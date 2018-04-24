@@ -8,7 +8,7 @@ import Task
 
 
 type alias Model =
-    { calendar : DatePicker.Model }
+    { calendar : DatePicker.DatePicker }
 
 
 type Msg
