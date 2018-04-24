@@ -27,7 +27,7 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { calendar = DatePicker.initCalendar }
+    ( { calendar = DatePicker.initCalendar DatePicker.Single }
     , Cmd.map DatePickerMsg (Task.perform DatePicker.ReceiveDate Date.now)
     )
 
@@ -49,7 +49,7 @@ config =
         { config
             | rangeClass = "bg-dark-blue white"
             , rangeHoverClass = "bg-dark-blue moon-gray"
-            , selectedClass = "bg-moon-gray"
+            , selectedClass = "bg-gray white"
             , weekdayFormat = "ddd"
             , validDate = validDate
         }

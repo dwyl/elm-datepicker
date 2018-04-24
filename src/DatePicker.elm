@@ -7,11 +7,12 @@ module DatePicker
         , showCalendar
         , defaultConfig
         , update
+        , Selection(..)
         )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
 
-@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update
+@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection
 
 -}
 
@@ -29,6 +30,15 @@ type alias MonthData =
 type FromTo
     = From
     | To
+    | Only
+
+
+{-| Type to pass to [`initCalendar`](#initCalendar) that will determine if your datepicker will
+be used to select a single date or a range of dates
+-}
+type Selection
+    = Single
+    | Range
 
 
 type alias Model =
@@ -39,6 +49,7 @@ type alias Model =
     , selectDate : FromTo
     , from : Maybe Date
     , to : Maybe Date
+    , single : Maybe Date
     , overDate : Maybe Date
     }
 
@@ -107,20 +118,37 @@ type alias Config =
     }
 
 
-{-| The function called to initialise the Calendar. Returns the initial model
+{-| The function called to initialise the Calendar. Returns the initial model.
+Pass it a [`Selection`](#Selection) type to determine whether it will be used
+to select a single date, or a range of dates.
+
+    init : ( Model, Cmd Msg )
+    init =
+        { calendar = DatePicker.initCalendar DatePicker.Single } ! []
+
 -}
-initCalendar : DatePicker
-initCalendar =
-    DatePicker <|
-        { currentDate = Nothing
-        , month = ( 2018, Jan, [] )
-        , nextMonth = ( 2018, Jan, [] )
-        , open = False
-        , selectDate = From
-        , from = Nothing
-        , to = Nothing
-        , overDate = Nothing
-        }
+initCalendar : Selection -> DatePicker
+initCalendar selection =
+    let
+        selectDate =
+            case selection of
+                Range ->
+                    From
+
+                Single ->
+                    Only
+    in
+        DatePicker <|
+            { currentDate = Nothing
+            , month = ( 2018, Jan, [] )
+            , nextMonth = ( 2018, Jan, [] )
+            , open = False
+            , selectDate = selectDate
+            , from = Nothing
+            , to = Nothing
+            , single = Nothing
+            , overDate = Nothing
+            }
 
 
 {-| The default config options that will be applied if not overwritten with a config argument to [`showCalendar`](#showCalendar)
@@ -196,7 +224,7 @@ isDateSelected date1 date2 =
 
 
 showDate : DatePicker -> Config -> Maybe Date -> Html Msg
-showDate (DatePicker { currentDate, from, to, overDate }) config date =
+showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
     let
         fromSelected =
             isDateSelected date from
@@ -204,8 +232,11 @@ showDate (DatePicker { currentDate, from, to, overDate }) config date =
         toSelected =
             isDateSelected date to
 
+        singleSelected =
+            isDateSelected date single
+
         selected =
-            fromSelected || toSelected
+            fromSelected || toSelected || singleSelected
 
         insideRange =
             DateCore.inRange date from to
@@ -395,6 +426,9 @@ update msg (DatePicker model) =
                                         DatePicker ({ model | from = date, to = Nothing, selectDate = To })
                                     else
                                         DatePicker ({ model | to = date, selectDate = From })
+
+                                Only ->
+                                    DatePicker ({ model | single = date, selectDate = Only })
                     in
                         update ! []
 
