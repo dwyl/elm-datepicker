@@ -1,17 +1,19 @@
-module DatePicker exposing (..)
+module DatePicker
+    exposing
+        ( Model
+        , Msg(..)
+        , Config
+        , initCalendar
+        , showCalendar
+        , defaultViewConfig
+        , update
+        )
 
 import Html.Events exposing (onClick, onInput, onMouseOver)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
-import Json.Decode as Json exposing (..)
-import Json.Decode.Pipeline exposing (..)
-import Time
-import Process
-import Task
 import DateCore exposing (..)
 import Date exposing (..)
-import Task exposing (perform)
 
 
 type alias MonthData =
@@ -32,7 +34,6 @@ type alias Model =
     , from : Maybe Date
     , to : Maybe Date
     , overDate : Maybe Date
-    , config : Config
     }
 
 
@@ -55,6 +56,8 @@ type alias Config =
     , disabledClass : String
     , validClass : String
     , dayClass : String
+    , calendarClass : String
+    , weekdayFormat : String
     }
 
 
@@ -68,18 +71,19 @@ initCalendar =
     , from = Nothing
     , to = Nothing
     , overDate = Nothing
-    , config = defaultConfig
     }
 
 
-defaultConfig : Config
-defaultConfig =
+defaultViewConfig : Config
+defaultViewConfig =
     { rangeClass = "bg-dark-pink white"
     , rangeHoverClass = "bg-dark-pink moon-gray"
     , selectedClass = "bg-moon-gray"
     , dayClass = "pa1"
     , disabledClass = "moon-gray"
     , validClass = "pointer"
+    , calendarClass = "pa3 dib gray"
+    , weekdayFormat = "dd"
     }
 
 
@@ -98,8 +102,8 @@ isDateSelected date1 date2 =
             False
 
 
-showDate : Model -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> Html Msg
-showDate model currentDate from to overDate date =
+showDate : Model -> Config -> Maybe Date -> Html Msg
+showDate { currentDate, from, to, overDate } config date =
     let
         next2days =
             (DateCore.getNextDay >> DateCore.getNextDay) currentDate
@@ -133,18 +137,12 @@ showDate model currentDate from to overDate date =
         case date of
             Just _ ->
                 if validDate then
-                    td [ class (model.config.dayClass ++ " " ++ model.config.validClass), classList [ ( model.config.selectedClass, selected ), ( model.config.rangeClass, insideRange ), ( model.config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
+                    td [ class (config.dayClass ++ " " ++ config.validClass), classList [ ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
                 else
-                    td [ class (model.config.dayClass ++ " " ++ model.config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
+                    td [ class (config.dayClass ++ " " ++ config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
 
             Nothing ->
-                td [ class model.config.dayClass ] [ text <| DateCore.getFormattedDate date ]
-
-
-
--- getNextMonth : Maybe Date
--- Create a Maybe Date from string ex: 2018-01-01 = Just <2018...>
--- Crate a string from Ints year month day: 2018 1 1 = "2018-1-1"
+                td [ class config.dayClass ] [ text <| DateCore.getFormattedDate date ]
 
 
 getDates : Year -> Month -> List (Maybe Date)
@@ -171,35 +169,52 @@ getDates year month =
         prepend ++ datesOfMonth ++ append
 
 
-showMonth : Model -> Maybe Date -> List (Maybe Date) -> Maybe Date -> Maybe Date -> Maybe Date -> List (Html Msg)
-showMonth model currentDate month from to overDate =
-    List.map (showWeek model currentDate from to overDate) (DateCore.groupByWeek month)
+showMonth : Model -> Config -> List (Maybe Date) -> List (Html Msg)
+showMonth model config month =
+    List.map (showWeek model config) (DateCore.groupByWeek month)
 
 
-showWeek : Model -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> List (Maybe Date) -> Html Msg
-showWeek model currentDate from to overDate week =
-    tr [] (List.map (showDate model currentDate from to overDate) week)
+showWeek : Model -> Config -> List (Maybe Date) -> Html Msg
+showWeek model config week =
+    tr [] (List.map (showDate model config) week)
 
 
-showCalendar : Model -> Maybe Date -> MonthData -> Maybe Date -> Maybe Date -> Maybe Date -> Html Msg
-showCalendar model currentDate ( year, month, dates ) from to overDate =
-    div [ class "pa3 dib gray" ]
-        [ h1 [] [ text (toString year ++ " " ++ toString month) ]
-        , table []
-            [ thead []
-                [ tr []
-                    [ td [ class "pa1" ] [ text "M" ]
-                    , td [ class "pa1" ] [ text "Tu" ]
-                    , td [ class "pa1" ] [ text "W" ]
-                    , td [ class "pa1" ] [ text "Th" ]
-                    , td [ class "pa1" ] [ text "F" ]
-                    , td [ class "pa1" ] [ text "Sa" ]
-                    , td [ class "pa1" ] [ text "Su" ]
+showCalendar : Model -> Config -> Html Msg
+showCalendar model config =
+    let
+        ( year, month, dates ) =
+            model.month
+    in
+        div [ class config.calendarClass ]
+            [ h1 [] [ text (toString year ++ " " ++ toString month) ]
+            , table []
+                [ thead []
+                    [ tr []
+                        (renderWeekdays config)
                     ]
+                , tbody [] (showMonth model config dates)
                 ]
-            , tbody [] (showMonth model currentDate dates from to overDate)
             ]
-        ]
+
+
+renderWeekdays : Config -> List (Html Msg)
+renderWeekdays config =
+    let
+        days =
+            case config.weekdayFormat of
+                "d" ->
+                    [ "M", "T", "W", "T", "F", "S", "S" ]
+
+                "ddd" ->
+                    [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
+
+                "D" ->
+                    [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
+
+                _ ->
+                    [ "M", "Tu", "W", "Th", "F", "Sa", "Su" ]
+    in
+        List.map (\day -> td [ class config.dayClass ] [ text day ]) days
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
