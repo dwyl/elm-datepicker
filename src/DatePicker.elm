@@ -1,17 +1,26 @@
-module DatePicker exposing (..)
+module DatePicker
+    exposing
+        ( DatePicker
+        , Msg(..)
+        , Config
+        , initCalendar
+        , showCalendar
+        , defaultConfig
+        , update
+        , Selection(..)
+        )
+
+{-| A customisable DatePicker that easily allows you to select a range of dates
+
+@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection
+
+-}
 
 import Html.Events exposing (onClick, onInput, onMouseOver)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
-import Json.Decode as Json exposing (..)
-import Json.Decode.Pipeline exposing (..)
-import Time
-import Process
-import Task
 import DateCore exposing (..)
 import Date exposing (..)
-import Task exposing (perform)
 
 
 type alias MonthData =
@@ -21,6 +30,15 @@ type alias MonthData =
 type FromTo
     = From
     | To
+    | Only
+
+
+{-| Type to pass to [`initCalendar`](#initCalendar) that will determine if your datepicker will
+be used to select a single date or a range of dates
+-}
+type Selection
+    = Single
+    | Range
 
 
 type alias Model =
@@ -31,11 +49,24 @@ type alias Model =
     , selectDate : FromTo
     , from : Maybe Date
     , to : Maybe Date
+    , single : Maybe Date
     , overDate : Maybe Date
-    , config : Config
     }
 
 
+{-| The DatePicker model
+-}
+type DatePicker
+    = DatePicker Model
+
+
+{-| DatePicker Messages. These messages can be called manually with the update function as follows:
+
+    goToNextMonth : DatePicker -> ( DatePicker, Cmd Msg )
+    goToNextMonth datepicker =
+        DatePicker.update NextMonth datepicker
+
+-}
 type Msg
     = ReceiveDate Date
     | ToggleCalendar
@@ -48,6 +79,32 @@ type Msg
     | ClearDates
 
 
+{-| The Config that is passed to [`showCalendar`](#showCalendar) to control html classes and valid dates.
+
+  - **rangeClass**: The html class to apply to the selected date range.
+
+  - **rangeHoverClass**: The html class to apply to the selected date range on hover.
+
+  - **selectedClass**: The html class to apply to a single selected date.
+
+  - **disabledClass**: The html class to apply to a disabled/invalid dates.
+
+  - **validClass**: The html class to apply to a valid/selectable dates.
+
+  - **dayClass**: The html class to apply to all dates.
+
+  - **calendarClass**: The html class to apply to the calendar container.
+
+  - **weekdayFormat**: The format of the Weekday labels (Mon, Tue etc.). options:
+      - **"d"**: M, T, W, T, F, S, S
+      - **"dd"**: M, Tu, W, Th, F, Sa, Su
+      - **"ddd"**: Mon, Tue, Wed, Thu, Fri, Sat, Sun
+      - **"D"**: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+
+  - **validDate**: A function that takes a single date, and the current date, and returns true if that date is available to select,
+    or false if not.
+
+-}
 type alias Config =
     { rangeClass : String
     , rangeHoverClass : String
@@ -55,23 +112,76 @@ type alias Config =
     , disabledClass : String
     , validClass : String
     , dayClass : String
+    , calendarClass : String
+    , weekdayFormat : String
+    , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
 
-initCalendar : Model
-initCalendar =
-    { currentDate = Nothing
-    , month = ( 2018, Jan, [] )
-    , nextMonth = ( 2018, Jan, [] )
-    , open = False
-    , selectDate = From
-    , from = Nothing
-    , to = Nothing
-    , overDate = Nothing
-    , config = defaultConfig
-    }
+{-| The function called to initialise the Calendar. Returns the initial model.
+Pass it a [`Selection`](#Selection) type to determine whether it will be used
+to select a single date, or a range of dates.
+
+    init : ( Model, Cmd Msg )
+    init =
+        { calendar = DatePicker.initCalendar DatePicker.Single } ! []
+
+-}
+initCalendar : Selection -> DatePicker
+initCalendar selection =
+    let
+        selectDate =
+            case selection of
+                Range ->
+                    From
+
+                Single ->
+                    Only
+    in
+        DatePicker <|
+            { currentDate = Nothing
+            , month = ( 2018, Jan, [] )
+            , nextMonth = ( 2018, Jan, [] )
+            , open = False
+            , selectDate = selectDate
+            , from = Nothing
+            , to = Nothing
+            , single = Nothing
+            , overDate = Nothing
+            }
 
 
+{-| The default config options that will be applied if not overwritten with a config argument to [`showCalendar`](#showCalendar)
+
+    defaultConfig : Config
+    defaultConfig =
+        { rangeClass = "bg-dark-pink white"
+        , rangeHoverClass = "bg-dark-pink moon-gray"
+        , selectedClass = "bg-moon-gray"
+        , dayClass = "pa1"
+        , disabledClass = "moon-gray"
+        , validClass = "pointer"
+        , calendarClass = "pa3 dib gray"
+        , weekdayFormat = "dd"
+        , validDate = validDate
+        }
+
+    validDate : Maybe Date -> Maybe Date -> Bool
+    validDate date currentDate =
+        let
+            next2days =
+                (DateCore.getNextDay >> DateCore.getNextDay) currentDate
+
+            next18monthDate =
+                get18monthDate currentDate
+        in
+            (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
+
+Note: We use [`tachyons`](https://github.com/tachyons-css/tachyons) in our default classes, but you don't have to.
+We don't provide any css, so it's up to you to define these styles, or include [`tachyons from the cdn`](https://cdnjs.com/libraries/tachyons),
+or override them by passing a [`custom config`](#Config) to [`showCalendar`](#showCalendar)
+
+-}
 defaultConfig : Config
 defaultConfig =
     { rangeClass = "bg-dark-pink white"
@@ -80,7 +190,22 @@ defaultConfig =
     , dayClass = "pa1"
     , disabledClass = "moon-gray"
     , validClass = "pointer"
+    , calendarClass = "pa3 dib gray"
+    , weekdayFormat = "dd"
+    , validDate = validDate
     }
+
+
+validDate : Maybe Date -> Maybe Date -> Bool
+validDate date currentDate =
+    let
+        next2days =
+            (DateCore.getNextDay >> DateCore.getNextDay) currentDate
+
+        next18monthDate =
+            get18monthDate currentDate
+    in
+        (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
 
 
 isDateSelected : Maybe Date -> Maybe Date -> Bool
@@ -98,26 +223,20 @@ isDateSelected date1 date2 =
             False
 
 
-showDate : Model -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> Html Msg
-showDate model currentDate from to overDate date =
+showDate : DatePicker -> Config -> Maybe Date -> Html Msg
+showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
     let
-        next2days =
-            (DateCore.getNextDay >> DateCore.getNextDay) currentDate
-
-        next18monthDate =
-            get18monthDate currentDate
-
-        validDate =
-            (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
-
         fromSelected =
             isDateSelected date from
 
         toSelected =
             isDateSelected date to
 
+        singleSelected =
+            isDateSelected date single
+
         selected =
-            fromSelected || toSelected
+            fromSelected || toSelected || singleSelected
 
         insideRange =
             DateCore.inRange date from to
@@ -132,19 +251,13 @@ showDate model currentDate from to overDate date =
     in
         case date of
             Just _ ->
-                if validDate then
-                    td [ class (model.config.dayClass ++ " " ++ model.config.validClass), classList [ ( model.config.selectedClass, selected ), ( model.config.rangeClass, insideRange ), ( model.config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
+                if config.validDate date currentDate then
+                    td [ class (config.dayClass ++ " " ++ config.validClass), classList [ ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
                 else
-                    td [ class (model.config.dayClass ++ " " ++ model.config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
+                    td [ class (config.dayClass ++ " " ++ config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
 
             Nothing ->
-                td [ class model.config.dayClass ] [ text <| DateCore.getFormattedDate date ]
-
-
-
--- getNextMonth : Maybe Date
--- Create a Maybe Date from string ex: 2018-01-01 = Just <2018...>
--- Crate a string from Ints year month day: 2018 1 1 = "2018-1-1"
+                td [ class config.dayClass ] [ text <| DateCore.getFormattedDate date ]
 
 
 getDates : Year -> Month -> List (Maybe Date)
@@ -171,39 +284,82 @@ getDates year month =
         prepend ++ datesOfMonth ++ append
 
 
-showMonth : Model -> Maybe Date -> List (Maybe Date) -> Maybe Date -> Maybe Date -> Maybe Date -> List (Html Msg)
-showMonth model currentDate month from to overDate =
-    List.map (showWeek model currentDate from to overDate) (DateCore.groupByWeek month)
+showMonth : DatePicker -> Config -> List (Maybe Date) -> List (Html Msg)
+showMonth (DatePicker model) config month =
+    List.map (showWeek (DatePicker model) config) (DateCore.groupByWeek month)
 
 
-showWeek : Model -> Maybe Date -> Maybe Date -> Maybe Date -> Maybe Date -> List (Maybe Date) -> Html Msg
-showWeek model currentDate from to overDate week =
-    tr [] (List.map (showDate model currentDate from to overDate) week)
+showWeek : DatePicker -> Config -> List (Maybe Date) -> Html Msg
+showWeek (DatePicker model) config week =
+    tr [] (List.map (showDate (DatePicker model) config) week)
 
 
-showCalendar : Model -> Maybe Date -> MonthData -> Maybe Date -> Maybe Date -> Maybe Date -> Html Msg
-showCalendar model currentDate ( year, month, dates ) from to overDate =
-    div [ class "pa3 dib gray" ]
-        [ h1 [] [ text (toString year ++ " " ++ toString month) ]
-        , table []
-            [ thead []
-                [ tr []
-                    [ td [ class "pa1" ] [ text "M" ]
-                    , td [ class "pa1" ] [ text "Tu" ]
-                    , td [ class "pa1" ] [ text "W" ]
-                    , td [ class "pa1" ] [ text "Th" ]
-                    , td [ class "pa1" ] [ text "F" ]
-                    , td [ class "pa1" ] [ text "Sa" ]
-                    , td [ class "pa1" ] [ text "Su" ]
+{-| The function called to show the calendar. Pass it a config record to customise the DatePicker:
+
+    view : Model -> Html Msg
+    view =
+        model
+            div
+            []
+            [ (DatePicker.showCalendar model.calendar config) |> Html.map DatePickerMsg ]
+
+    config : DatePicker.Config
+    config =
+        let
+            config =
+                DatePicker.defaultConfig
+        in
+            { config
+                | weekdayFormat = "ddd"
+                , validDate = validDate
+            }
+
+    type Msg
+        = DatePickerMsg DatePicker.Msg
+
+-}
+showCalendar : DatePicker -> Config -> Html Msg
+showCalendar (DatePicker model) config =
+    let
+        ( year, month, dates ) =
+            model.month
+    in
+        div [ class config.calendarClass ]
+            [ h1 [] [ text (toString year ++ " " ++ toString month) ]
+            , table []
+                [ thead []
+                    [ tr []
+                        (renderWeekdays config)
                     ]
+                , tbody [] (showMonth (DatePicker model) config dates)
                 ]
-            , tbody [] (showMonth model currentDate dates from to overDate)
             ]
-        ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+renderWeekdays : Config -> List (Html Msg)
+renderWeekdays config =
+    let
+        days =
+            case config.weekdayFormat of
+                "d" ->
+                    [ "M", "T", "W", "T", "F", "S", "S" ]
+
+                "ddd" ->
+                    [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
+
+                "D" ->
+                    [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
+
+                _ ->
+                    [ "M", "Tu", "W", "Th", "F", "Sa", "Su" ]
+    in
+        List.map (\day -> td [ class config.dayClass ] [ text day ]) days
+
+
+{-| The DatePicker update function
+-}
+update : Msg -> DatePicker -> ( DatePicker, Cmd Msg )
+update msg (DatePicker model) =
     case msg of
         ReceiveDate date ->
             let
@@ -222,10 +378,10 @@ update msg model =
                 nextMonth =
                     getDates year2 month2
             in
-                ( { model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth ), currentDate = currentDate }, Cmd.none )
+                DatePicker ({ model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth ), currentDate = currentDate }) ! []
 
         ToggleCalendar ->
-            ( { model | open = not model.open }, Cmd.none )
+            DatePicker ({ model | open = not model.open }) ! []
 
         PreviousMonth ->
             let
@@ -238,7 +394,7 @@ update msg model =
                 prevData =
                     getDates prevYear prevMonth
             in
-                ( { model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month }, Cmd.none )
+                DatePicker ({ model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month }) ! []
 
         NextMonth ->
             let
@@ -250,11 +406,8 @@ update msg model =
 
                 nextData =
                     getDates nextYear nextMonth
-
-                update =
-                    { model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth, nextData ) }
             in
-                ( update, Cmd.none )
+                DatePicker ({ model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth, nextData ) }) ! []
 
         SelectDate date ->
             case date of
@@ -264,29 +417,32 @@ update msg model =
                             case model.selectDate of
                                 From ->
                                     if DateCore.greaterOrEqual date model.to then
-                                        { model | from = date, to = Nothing, selectDate = To }
+                                        DatePicker ({ model | from = date, to = Nothing, selectDate = To })
                                     else
-                                        { model | from = date, selectDate = To }
+                                        DatePicker ({ model | from = date, selectDate = To })
 
                                 To ->
                                     if DateCore.lowerOrEqual date model.from then
-                                        { model | from = date, to = Nothing, selectDate = To }
+                                        DatePicker ({ model | from = date, to = Nothing, selectDate = To })
                                     else
-                                        { model | to = date, selectDate = From }
+                                        DatePicker ({ model | to = date, selectDate = From })
+
+                                Only ->
+                                    DatePicker ({ model | single = date, selectDate = Only })
                     in
-                        ( update, Cmd.none )
+                        update ! []
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    (DatePicker model) ! []
 
         OverDate date ->
-            ( { model | overDate = date }, Cmd.none )
+            DatePicker ({ model | overDate = date }) ! []
 
         CancelDates ->
-            ( { model | from = Nothing, to = Nothing, open = False, selectDate = From }, Cmd.none )
+            DatePicker ({ model | from = Nothing, to = Nothing, open = False, selectDate = From }) ! []
 
         ApplyDates ->
-            ( { model | open = False }, Cmd.none )
+            DatePicker ({ model | open = False }) ! []
 
         ClearDates ->
-            ( { model | from = Nothing, to = Nothing, selectDate = From }, Cmd.none )
+            DatePicker ({ model | from = Nothing, to = Nothing, selectDate = From }) ! []
