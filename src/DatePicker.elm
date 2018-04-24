@@ -5,7 +5,7 @@ module DatePicker
         , Config
         , initCalendar
         , showCalendar
-        , defaultViewConfig
+        , defaultConfig
         , update
         )
 
@@ -58,6 +58,7 @@ type alias Config =
     , dayClass : String
     , calendarClass : String
     , weekdayFormat : String
+    , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
 
@@ -74,8 +75,8 @@ initCalendar =
     }
 
 
-defaultViewConfig : Config
-defaultViewConfig =
+defaultConfig : Config
+defaultConfig =
     { rangeClass = "bg-dark-pink white"
     , rangeHoverClass = "bg-dark-pink moon-gray"
     , selectedClass = "bg-moon-gray"
@@ -84,7 +85,20 @@ defaultViewConfig =
     , validClass = "pointer"
     , calendarClass = "pa3 dib gray"
     , weekdayFormat = "dd"
+    , validDate = validDate
     }
+
+
+validDate : Maybe Date -> Maybe Date -> Bool
+validDate date currentDate =
+    let
+        next2days =
+            (DateCore.getNextDay >> DateCore.getNextDay) currentDate
+
+        next18monthDate =
+            get18monthDate currentDate
+    in
+        (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
 
 
 isDateSelected : Maybe Date -> Maybe Date -> Bool
@@ -105,15 +119,6 @@ isDateSelected date1 date2 =
 showDate : Model -> Config -> Maybe Date -> Html Msg
 showDate { currentDate, from, to, overDate } config date =
     let
-        next2days =
-            (DateCore.getNextDay >> DateCore.getNextDay) currentDate
-
-        next18monthDate =
-            get18monthDate currentDate
-
-        validDate =
-            (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
-
         fromSelected =
             isDateSelected date from
 
@@ -136,7 +141,7 @@ showDate { currentDate, from, to, overDate } config date =
     in
         case date of
             Just _ ->
-                if validDate then
+                if config.validDate date currentDate then
                     td [ class (config.dayClass ++ " " ++ config.validClass), classList [ ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
                 else
                     td [ class (config.dayClass ++ " " ++ config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]

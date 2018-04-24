@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import DatePicker
 import Date exposing (Date)
-import DateCore exposing (..)
 import Task
 
 
@@ -37,22 +36,36 @@ view : Model -> Html Msg
 view model =
     div []
         [ div []
-            [ (DatePicker.showCalendar model.calendar viewConfig) |> Html.map DatePickerMsg ]
+            [ (DatePicker.showCalendar model.calendar config) |> Html.map DatePickerMsg ]
         ]
 
 
-viewConfig : DatePicker.Config
-viewConfig =
+config : DatePicker.Config
+config =
     let
         config =
-            DatePicker.defaultViewConfig
+            DatePicker.defaultConfig
     in
         { config
             | rangeClass = "bg-dark-blue white"
             , rangeHoverClass = "bg-dark-blue moon-gray"
             , selectedClass = "bg-moon-gray"
             , weekdayFormat = "ddd"
+            , validDate = validDate
         }
+
+
+validDate : Maybe Date -> Maybe Date -> Bool
+validDate date currentDate =
+    case ( date, currentDate ) of
+        ( _, Nothing ) ->
+            True
+
+        ( Just date1, Just date2 ) ->
+            (Date.toTime date1) > (Date.toTime date2)
+
+        ( Nothing, Just _ ) ->
+            False
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
