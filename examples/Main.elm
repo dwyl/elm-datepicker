@@ -47,9 +47,9 @@ config =
             DatePicker.defaultConfig
     in
         { config
-            | rangeClass = "bg-dark-blue white"
-            , rangeHoverClass = "bg-dark-blue moon-gray"
-            , selectedClass = "bg-gray white"
+            | rangeClass = "bg-dark-red white"
+            , rangeHoverClass = "bg-dark-red moon-gray"
+            , selectedClass = "bg-dark-red white"
             , weekdayFormat = "ddd"
             , validDate = validDate
         }

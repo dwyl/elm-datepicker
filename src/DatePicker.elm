@@ -169,28 +169,21 @@ initCalendar selection =
 
     defaultConfig : Config
     defaultConfig =
-        { rangeClass = "bg-dark-pink white"
-        , rangeHoverClass = "bg-dark-pink moon-gray"
-        , selectedClass = "bg-moon-gray"
+        { rangeClass = "bg-dark-blue white"
+        , rangeHoverClass = "bg-dark-blue moon-gray"
+        , selectedClass = "bg-dark-blue white"
         , dayClass = "pa1"
         , disabledClass = "moon-gray"
         , validClass = "pointer"
         , calendarClass = "pa3 dib gray"
         , titleClass = "tc"
-        , weekdayFormat = "dd"
+        , weekdayFormat = "ddd"
         , validDate = validDate
         }
 
     validDate : Maybe Date -> Maybe Date -> Bool
     validDate date currentDate =
-        let
-            next2days =
-                (DateCore.getNextDay >> DateCore.getNextDay) currentDate
-
-            next18monthDate =
-                get18monthDate currentDate
-        in
-            (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
+        DateCore.greaterOrEqual date currentDate
 
 Note: We use [`tachyons`](https://github.com/tachyons-css/tachyons) in our default classes, but you don't have to.
 We don't provide any css, so it's up to you to define these styles, or include [`tachyons from the cdn`](https://cdnjs.com/libraries/tachyons),
@@ -199,29 +192,22 @@ or override them by passing a [`custom config`](#Config) to [`showCalendar`](#sh
 -}
 defaultConfig : Config
 defaultConfig =
-    { rangeClass = "bg-dark-pink white"
-    , rangeHoverClass = "bg-dark-pink moon-gray"
-    , selectedClass = "bg-moon-gray"
+    { rangeClass = "bg-dark-blue white"
+    , rangeHoverClass = "bg-dark-blue moon-gray"
+    , selectedClass = "bg-dark-blue white"
     , dayClass = "pa1"
     , disabledClass = "moon-gray"
     , validClass = "pointer"
     , calendarClass = "pa3 dib gray"
     , titleClass = "tc"
-    , weekdayFormat = "dd"
+    , weekdayFormat = "ddd"
     , validDate = validDate
     }
 
 
 validDate : Maybe Date -> Maybe Date -> Bool
 validDate date currentDate =
-    let
-        next2days =
-            (DateCore.getNextDay >> DateCore.getNextDay) currentDate
-
-        next18monthDate =
-            get18monthDate currentDate
-    in
-        (DateCore.greater date next2days) && (DateCore.lowerOrEqual date next18monthDate)
+    DateCore.greaterOrEqual date currentDate
 
 
 isDateSelected : Maybe Date -> Maybe Date -> Bool
