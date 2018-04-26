@@ -35,8 +35,8 @@ init =
 view : Model -> Html Msg
 view model =
     div []
-        [ div []
-            [ (DatePicker.showCalendar model.calendar config) |> Html.map DatePickerMsg ]
+        [ DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+            |> Html.map DatePickerMsg
         ]
 
 
@@ -47,9 +47,9 @@ config =
             DatePicker.defaultConfig
     in
         { config
-            | rangeClass = "bg-dark-blue white"
-            , rangeHoverClass = "bg-dark-blue moon-gray"
-            , selectedClass = "bg-gray white"
+            | rangeClass = "bg-dark-red white"
+            , rangeHoverClass = "bg-dark-red moon-gray"
+            , selectedClass = "bg-dark-red white"
             , weekdayFormat = "ddd"
             , validDate = validDate
         }
@@ -72,13 +72,4 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DatePickerMsg datePickerMsg ->
-            datePickerUpdate datePickerMsg model
-
-
-datePickerUpdate : DatePicker.Msg -> Model -> ( Model, Cmd Msg )
-datePickerUpdate datePickerMsg model =
-    let
-        ( dateModel, dateCmd ) =
-            DatePicker.update datePickerMsg model.calendar
-    in
-        { model | calendar = dateModel } ! [ Cmd.map DatePickerMsg dateCmd ]
+            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []
