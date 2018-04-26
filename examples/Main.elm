@@ -36,7 +36,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ div []
-            [ (DatePicker.showCalendar model.calendar config) |> Html.map DatePickerMsg ]
+            [ (DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config) |> Html.map DatePickerMsg ]
         ]
 
 
