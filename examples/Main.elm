@@ -72,13 +72,4 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DatePickerMsg datePickerMsg ->
-            datePickerUpdate datePickerMsg model
-
-
-datePickerUpdate : DatePicker.Msg -> Model -> ( Model, Cmd Msg )
-datePickerUpdate datePickerMsg model =
-    let
-        ( dateModel, dateCmd ) =
-            DatePicker.update datePickerMsg model.calendar
-    in
-        { model | calendar = dateModel } ! [ Cmd.map DatePickerMsg dateCmd ]
+            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []

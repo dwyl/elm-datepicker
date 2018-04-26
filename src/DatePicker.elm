@@ -374,7 +374,7 @@ renderWeekdays config =
 
 {-| The DatePicker update function
 -}
-update : Msg -> DatePicker -> ( DatePicker, Cmd Msg )
+update : Msg -> DatePicker -> DatePicker
 update msg (DatePicker model) =
     case msg of
         ReceiveDate date ->
@@ -394,10 +394,10 @@ update msg (DatePicker model) =
                 nextMonth =
                     getDates year2 month2
             in
-                DatePicker ({ model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth ), currentDate = currentDate }) ! []
+                DatePicker ({ model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth ), currentDate = currentDate })
 
         ToggleCalendar ->
-            DatePicker ({ model | open = not model.open }) ! []
+            DatePicker ({ model | open = not model.open })
 
         PreviousMonth ->
             let
@@ -410,7 +410,7 @@ update msg (DatePicker model) =
                 prevData =
                     getDates prevYear prevMonth
             in
-                DatePicker ({ model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month }) ! []
+                DatePicker ({ model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month })
 
         NextMonth ->
             let
@@ -423,7 +423,7 @@ update msg (DatePicker model) =
                 nextData =
                     getDates nextYear nextMonth
             in
-                DatePicker ({ model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth, nextData ) }) ! []
+                DatePicker ({ model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth, nextData ) })
 
         SelectDate date ->
             case date of
@@ -446,19 +446,19 @@ update msg (DatePicker model) =
                                 Only ->
                                     DatePicker ({ model | single = date, selectDate = Only })
                     in
-                        update ! []
+                        update
 
                 Nothing ->
-                    (DatePicker model) ! []
+                    (DatePicker model)
 
         OverDate date ->
-            DatePicker ({ model | overDate = date }) ! []
+            DatePicker ({ model | overDate = date })
 
         CancelDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, open = False, selectDate = From }) ! []
+            DatePicker ({ model | from = Nothing, to = Nothing, open = False, selectDate = From })
 
         ClearDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, selectDate = From }) ! []
+            DatePicker ({ model | from = Nothing, to = Nothing, selectDate = From })
 
 
 {-| Get the `from` date in a selected range
