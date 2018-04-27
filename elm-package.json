@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
+    "summary": "A customisable date picker written in Elm",
+    "repository": "https://github.com/dwyl/elm-datepicker.git",
     "license": "BSD3",
     "source-directories": [
         "src"
