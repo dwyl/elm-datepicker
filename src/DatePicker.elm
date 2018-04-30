@@ -441,10 +441,10 @@ update msg (DatePicker model) =
             DatePicker ({ model | overDate = date })
 
         CancelDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, open = False, selectDate = From })
+            DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, open = False, selectDate = From })
 
         ClearDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, selectDate = From })
+            DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, selectDate = From })
 
 
 {-| Get the `from` date in a selected range
