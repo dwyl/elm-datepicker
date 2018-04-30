@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "summary": "A customisable date picker written in Elm",
     "repository": "https://github.com/dwyl/elm-datepicker.git",
     "license": "BSD3",
@@ -7,7 +7,7 @@
         "src"
     ],
     "exposed-modules": [
-      "DatePicker"
+        "DatePicker"
     ],
     "dependencies": {
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
