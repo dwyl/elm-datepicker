@@ -28,7 +28,7 @@ main =
 init : ( Model, Cmd Msg )
 init =
     ( { calendar = DatePicker.initCalendar DatePicker.Single }
-    , Cmd.map DatePickerMsg (Task.perform DatePicker.ReceiveDate Date.now)
+    , Cmd.map DatePickerMsg DatePicker.receiveDate
     )
 
 
