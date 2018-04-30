@@ -6,8 +6,9 @@ A customisble Datepicker written in Elm.
 
 Initialise the DatePicker by calling `DatePicker.initCalendar`. Provide it with a single argument: `Single` if you just want to be able to select a single date, or `Range` if you want to select a range.
 
-It's a good idea here to set up a Msg type that you can use to communicate with the DatePicker module.
-``` Elm
+It's a good idea here to set up a Msg type that you can use to forward DatePicker messages the DatePicker update function.
+
+```Elm
 type alias Model =
     { calendar : DatePicker.DatePicker }
 
@@ -19,7 +20,7 @@ type Msg
 init : ( Model, Cmd Msg )
 init =
     ( { calendar = DatePicker.initCalendar DatePicker.Single }
-    , Cmd.map DatePickerMsg (Task.perform DatePicker.ReceiveDate Date.now)
+    , Cmd.map DatePickerMsg DatePicker.receiveDate
     )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -27,13 +28,14 @@ update msg model =
     case msg of
         ...
         DatePickerMsg datePickerMsg ->
-            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! [  ]
+            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []
 ```
 
 To display the DatePicker, call `DatePicker.showCalendar`. This takes the initialised datepicker as its first argument, the month you want to display as the second, and a configuration record as the third.
 
 Don't forget, the Html will return a `DatePicker.Msg`, so you have to map it to the `DatePickerMsg Msg` we set up above, using `Html.map DatePickerMsg`.
-``` Elm
+
+```Elm
 view : Model -> Html Msg
 view model =
   div []
@@ -71,7 +73,9 @@ validDate date currentDate =
 ```
 
 ## Examples
+
 To run the examples:
+
 ```sh
   elm make examples/Main.elm --output=examples/examples.js
   elm-reactor

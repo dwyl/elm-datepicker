@@ -1,7 +1,7 @@
 module DatePicker
     exposing
         ( DatePicker
-        , Msg(..)
+        , Msg
         , Config
         , initCalendar
         , showCalendar
@@ -13,6 +13,12 @@ module DatePicker
         , isOpen
         , getMonth
         , getNextMonth
+        , clearDates
+        , toggleCalendar
+        , cancelDates
+        , previousMonth
+        , nextMonth
+        , receiveDate
         )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
@@ -26,6 +32,13 @@ These functions allow you to access data from the DatePicker model.
 
 @docs getFrom, getTo, getMonth, getNextMonth, isOpen
 
+
+# API Functions
+
+These functions allow us to perform updates to the datepicker model
+
+@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, receiveDate
+
 -}
 
 import Html.Events exposing (onClick, onInput, onMouseOver)
@@ -33,6 +46,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import DateCore exposing (..)
 import Date exposing (..)
+import Task
 
 
 type alias MonthData =
@@ -72,12 +86,7 @@ type DatePicker
     = DatePicker Model
 
 
-{-| DatePicker Messages. These messages can be called manually with the update function as follows:
-
-    goToNextMonth : DatePicker -> ( DatePicker, Cmd Msg )
-    goToNextMonth datepicker =
-        DatePicker.update NextMonth datepicker
-
+{-| Opaque DatePicker Msg type
 -}
 type Msg
     = ReceiveDate Date
@@ -487,3 +496,45 @@ getNextMonth (DatePicker model) =
 isOpen : DatePicker -> Bool
 isOpen (DatePicker model) =
     model.open
+
+
+{-| Clears all selected dates
+-}
+clearDates : DatePicker -> DatePicker
+clearDates =
+    update ClearDates
+
+
+{-| Closes or opens calendar
+-}
+toggleCalendar : DatePicker -> DatePicker
+toggleCalendar =
+    update ToggleCalendar
+
+
+{-| Clears all selected dates and closes calendar
+-}
+cancelDates : DatePicker -> DatePicker
+cancelDates =
+    update CancelDates
+
+
+{-| Sets current month to previous month, and next month to current month
+-}
+previousMonth : DatePicker -> DatePicker
+previousMonth =
+    update PreviousMonth
+
+
+{-| Sets current month to next month, and next month to next month + 1
+-}
+nextMonth : DatePicker -> DatePicker
+nextMonth =
+    update NextMonth
+
+
+{-| Gets current date to initialise the calendar
+-}
+receiveDate : Cmd Msg
+receiveDate =
+    Task.perform ReceiveDate Date.now
