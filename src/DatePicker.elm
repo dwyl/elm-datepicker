@@ -450,10 +450,28 @@ update msg (DatePicker model) =
             DatePicker ({ model | overDate = date })
 
         CancelDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, open = False, selectDate = From })
+            let
+                selection =
+                    case model.selectDate of
+                        Only ->
+                            Only
+
+                        _ ->
+                            From
+            in
+                DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, open = False, selectDate = selection })
 
         ClearDates ->
-            DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, selectDate = From })
+            let
+                selection =
+                    case model.selectDate of
+                        Only ->
+                            Only
+
+                        _ ->
+                            From
+            in
+                DatePicker ({ model | from = Nothing, to = Nothing, single = Nothing, selectDate = selection })
 
 
 {-| Get the `from` date in a selected range
