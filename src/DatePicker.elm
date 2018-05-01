@@ -13,6 +13,7 @@ module DatePicker
         , isOpen
         , getMonth
         , getNextMonth
+        , getSelectedDate
         , clearDates
         , toggleCalendar
         , cancelDates
@@ -30,7 +31,7 @@ module DatePicker
 
 These functions allow you to access data from the DatePicker model.
 
-@docs getFrom, getTo, getMonth, getNextMonth, isOpen
+@docs getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
 
 
 # API Functions
