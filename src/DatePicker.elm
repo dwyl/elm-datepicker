@@ -20,11 +20,12 @@ module DatePicker
         , previousMonth
         , nextMonth
         , receiveDate
+        , setDate
         )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
 
-@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection
+@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection, receiveDate
 
 
 # Getter Functions
@@ -36,9 +37,20 @@ These functions allow you to access data from the DatePicker model.
 
 # API Functions
 
-These functions allow us to perform updates to the datepicker model
+These functions allow us to perform updates to the datepicker model. Just pass the datepicker as the last argument.
+For example:
 
-@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, receiveDate
+```Elm
+  newDatepicker = DatePicker.setDate date datepicker
+```
+
+Or
+
+```Elm
+  newDatePicker = DatePicker.clearDates datepicker
+```
+
+@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
 
 -}
 
@@ -557,3 +569,10 @@ nextMonth =
 receiveDate : Cmd Msg
 receiveDate =
     Task.perform ReceiveDate Date.now
+
+
+{-| Manually set the selected date
+-}
+setDate : Date -> DatePicker -> DatePicker
+setDate date =
+    update (SelectDate (Just date))
