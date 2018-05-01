@@ -1,5 +1,5 @@
 {
-    "version": "2.0.0",
+    "version": "2.1.0",
     "summary": "A customisable date picker written in Elm",
     "repository": "https://github.com/dwyl/elm-datepicker.git",
     "license": "BSD3",
