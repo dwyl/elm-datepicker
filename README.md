@@ -1,6 +1,8 @@
 ## Elm DatePicker
 
-A customisble Datepicker written in Elm.
+A customisable Datepicker written in Elm.
+
+[![Build Status](https://travis-ci.org/dwyl/elm-datepicker.svg?branch=master)](https://travis-ci.org/dwyl/elm-datepicker)
 
 ### Usage
 
@@ -82,3 +84,18 @@ To run the examples:
 ```
 
 Then visit `localhost:8000` and open `index.html`
+
+## Tests
+
+First, ensure that you have the dependencies installed:
+
+```sh
+elm-package install -y
+```
+
+_Then_ run the tests on your `localhost`,
+using the following command in your Terminal:
+
+```sh
+elm-test --verbose
+```
