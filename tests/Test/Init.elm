@@ -33,5 +33,5 @@ suite =
         , test "Default Month" <|
             \_ -> Expect.equal (getMonth rangeCalendar) ( 2018, Jan, [] )
         , test "Default nextMonth" <|
-            \_ -> Expect.equal (getNextMonth rangeCalendar) ( 2018, Jan, [] )
+            \_ -> Expect.equal (getNextMonth rangeCalendar) ( 2018, Feb, [] )
         ]
