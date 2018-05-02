@@ -99,3 +99,5 @@ using the following command in your Terminal:
 ```sh
 elm-test --verbose
 ```
+
+[![HitCount](http://hits.dwyl.io/dwyl/elm-datepicker.svg)](http://hits.dwyl.io/dwyl/elm-datepicker)
