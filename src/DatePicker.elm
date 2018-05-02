@@ -177,7 +177,7 @@ initCalendar selection =
         DatePicker <|
             { currentDate = Nothing
             , month = ( 2018, Jan, [] )
-            , nextMonth = ( 2018, Jan, [] )
+            , nextMonth = ( 2018, Feb, [] )
             , open = False
             , selectDate = selectDate
             , from = Nothing
