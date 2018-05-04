@@ -2,6 +2,7 @@ module Example exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import DatePicker
 import Date exposing (Date)
 import Task
@@ -13,6 +14,8 @@ type alias Model =
 
 type Msg
     = DatePickerMsg DatePicker.Msg
+    | PreviousMonth
+    | NextMonth
 
 
 main : Program Never Model Msg
@@ -35,8 +38,10 @@ init =
 view : Model -> Html Msg
 view model =
     div []
-        [ DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+        [ button [ id "previous-month", onClick PreviousMonth ] [ text "<" ]
+        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
             |> Html.map DatePickerMsg
+        , button [ id "next-month", onClick NextMonth ] [ text ">" ]
         ]
 
 
@@ -49,7 +54,7 @@ config =
         { config
             | rangeClass = "bg-dark-red white"
             , rangeHoverClass = "bg-dark-red moon-gray"
-            , selectedClass = "bg-dark-red white"
+            , selectedClass = "bg-dark-red white selected"
             , weekdayFormat = "ddd"
             , validDate = validDate
         }
@@ -73,3 +78,9 @@ update msg model =
     case msg of
         DatePickerMsg datePickerMsg ->
             { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []
+
+        PreviousMonth ->
+            { model | calendar = DatePicker.previousMonth model.calendar } ! []
+
+        NextMonth ->
+            { model | calendar = DatePicker.nextMonth model.calendar } ! []
