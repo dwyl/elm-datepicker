@@ -91,13 +91,20 @@ First, ensure that you have the dependencies installed:
 
 ```sh
 elm-package install -y
+npm install
 ```
 
-_Then_ run the tests on your `localhost`,
+_Then_ run the elm tests on your `localhost`,
 using the following command in your Terminal:
 
 ```sh
 elm-test --verbose
+```
+
+And run the cypress tests with:
+
+```sh
+./cypress-tests.sh
 ```
 
 [![HitCount](http://hits.dwyl.io/dwyl/elm-datepicker.svg)](http://hits.dwyl.io/dwyl/elm-datepicker)

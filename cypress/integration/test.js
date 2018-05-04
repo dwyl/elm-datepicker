@@ -1,7 +1,7 @@
 describe("Testing Example App", function() {
   context("Initialising", function() {
     beforeEach(function() {
-      cy.visit("http://localhost:8000/index.html");
+      cy.visit("http://localhost:8000/examples/index.html");
     });
 
     it(".should() - assert that <title> is correct", function() {
@@ -23,7 +23,7 @@ describe("Testing Example App", function() {
 
   context("Changing months", function() {
     beforeEach(function() {
-      cy.visit("http://localhost:8000/index.html");
+      cy.visit("http://localhost:8000/examples/index.html");
     });
 
     it("should go to previous month", function() {
@@ -55,7 +55,7 @@ describe("Testing Example App", function() {
 
   context("Selecting dates", function() {
     beforeEach(function() {
-      cy.visit("http://localhost:8000/index.html");
+      cy.visit("http://localhost:8000/examples/index.html");
     });
 
     it("should not select invalid day", function() {

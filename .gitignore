@@ -2,4 +2,6 @@ elm-stuff
 examples/example.js
 node_modules
 package-lock.json
+
 cypress/screenshots
+cypress/videos
