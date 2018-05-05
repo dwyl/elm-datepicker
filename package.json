@@ -1,0 +1,26 @@
+{
+  "name": "elm-datepicker",
+  "version": "1.0.0",
+  "description": "Customisable datepicker written in Elm",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwyl/elm-datepicker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dwyl/elm-datepicker/issues"
+  },
+  "homepage": "https://github.com/dwyl/elm-datepicker#readme",
+  "devDependencies": {
+    "cypress": "^2.1.0"
+  }
+}
