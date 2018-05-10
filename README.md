@@ -107,4 +107,10 @@ And run the cypress tests with:
 ./cypress-tests.sh
 ```
 
+If you want to see the tests running in the [cypress test runner](https://docs.cypress.io/guides/core-concepts/test-runner.html#), make sure elm-reactor is running, then run the cypress tests:
+
+```sh
+./node_modules/.bin/cypress open
+```
+
 [![HitCount](http://hits.dwyl.io/dwyl/elm-datepicker.svg)](http://hits.dwyl.io/dwyl/elm-datepicker)
