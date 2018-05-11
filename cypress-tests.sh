@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-elm make examples/Main.elm --output=examples/example.js
+elm make examples/Simple.elm --output=examples/example.js
 
 elm-reactor &
 
