@@ -62,12 +62,12 @@ view model =
 
 singleDate : Date -> Html Msg
 singleDate date =
-    div [ class "bg-white db mb3 mv1-l h-100 w-100 helvetica" ]
+    div [ onClick Toggle, class "pointer bg-white db mb3 mv1-l w-100 helvetica" ]
         [ div
-            [ class "bg-light-gray br-pill flex justify-between items-center overflow-hidden ml1-l" ]
-            [ p [ onClick Toggle, class "pointer pa2 ml3 f6 lh6" ]
+            [ class "bg-light-gray ba b--moon-gray br-pill flex justify-between items-center overflow-hidden ml1-l" ]
+            [ p [ class "pointer ph2 ml3 f6" ]
                 [ text <| (formatDate date) ]
-            , p [ onClick ClearDate, class "bg-light-gray pa2 pointer br-pill mr3" ] [ text "X" ]
+            , p [ onClick ClearDate, class "bg-light-gray ph2 pointer br-pill mr3 f6" ] [ text "X" ]
             ]
         ]
 
