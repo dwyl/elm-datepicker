@@ -1,4 +1,4 @@
-module Example exposing (..)
+module Simple exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -38,10 +38,11 @@ init =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ id "previous-month", onClick PreviousMonth ] [ text "<" ]
+        [ h2 [ class "helvetica m0" ] [ text "Simple DatePicker" ]
+        , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth ] [ text "<" ]
         , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
             |> Html.map DatePickerMsg
-        , button [ id "next-month", onClick NextMonth ] [ text ">" ]
+        , button [ id "next-month", class "bn pointer gray", onClick NextMonth ] [ text ">" ]
         ]
 
 
