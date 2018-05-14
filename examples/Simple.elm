@@ -40,38 +40,10 @@ view model =
     div []
         [ h2 [ class "helvetica m0" ] [ text "Simple DatePicker" ]
         , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth ] [ text "<" ]
-        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) DatePicker.defaultConfig
             |> Html.map DatePickerMsg
         , button [ id "next-month", class "bn pointer gray", onClick NextMonth ] [ text ">" ]
         ]
-
-
-config : DatePicker.Config
-config =
-    let
-        config =
-            DatePicker.defaultConfig
-    in
-        { config
-            | rangeClass = "bg-dark-red white"
-            , rangeHoverClass = "bg-dark-red moon-gray"
-            , selectedClass = "bg-dark-red white selected"
-            , weekdayFormat = "ddd"
-            , validDate = validDate
-        }
-
-
-validDate : Maybe Date -> Maybe Date -> Bool
-validDate date currentDate =
-    case ( date, currentDate ) of
-        ( _, Nothing ) ->
-            True
-
-        ( Just date1, Just date2 ) ->
-            (Date.toTime date1) > (Date.toTime date2)
-
-        ( Nothing, Just _ ) ->
-            False
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

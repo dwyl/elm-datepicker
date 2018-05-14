@@ -79,11 +79,43 @@ validDate date currentDate =
 To run the examples:
 
 ```sh
-  elm make examples/Main.elm --output=examples/examples.js
+  elm make examples/*.elm --output=examples/example.js
   elm-reactor
 ```
 
 Then visit `localhost:8000` and open `index.html`
+
+Alternatively, the examples are hosted on heroku at https://elm-datepicker.herokuapp.com/
+
+### Simple DatePicker
+
+<img width="496" alt="simple datepicker example" src="https://user-images.githubusercontent.com/8939909/39987635-3e3695ca-575d-11e8-82b1-96c6da221c02.png">
+
+This example shows the basic datepicker implementation, with no additional styling, only the addition of buttons to move to the next/previous month. [See code](https://github.com/dwyl/elm-datepicker/blob/master/examples/Simple.elm)
+
+### Styled DatePicker
+
+<img width="496" alt="styled datepicker example" src="https://user-images.githubusercontent.com/8939909/39988285-dfec33b0-575e-11e8-8e9c-7db2bb9b9162.png">
+
+The basic implementation of the datepicker with some custom styling applied. [See code](https://github.com/dwyl/elm-datepicker/blob/master/examples/Styled.elm)
+
+### Range DatePicker
+
+<img width="496" alt="range datepicker example" src="https://user-images.githubusercontent.com/8939909/39988708-f8afd450-575f-11e8-8f56-083804b146e6.png">
+
+The basic implementation of the datepicker, initialised to select a range instead of a single date. [See code](https://github.com/dwyl/elm-datepicker/blob/master/examples/Range.elm)
+
+### Two Month DatePicker
+
+<img width="496" alt="two month datepicker example" src="https://user-images.githubusercontent.com/8939909/39988831-5068ce2c-5760-11e8-9cb4-b7a3a3e482b3.png">
+
+An example showing how to display two months in one datepicker. [See code](https://github.com/dwyl/elm-datepicker/blob/master/examples/TwoMonth.elm)
+
+### Dropdown DatePicker
+
+<img width="496" alt="dropdown datepicker example" src="https://user-images.githubusercontent.com/8939909/39988995-bafb319e-5760-11e8-8f83-90877cd788e4.png">
+
+An example showing how to toggle the visibility of the datepicker, as well as how to use the selected date outside of the datepicker. [See code](https://github.com/dwyl/elm-datepicker/blob/master/examples/Dropdown.elm)
 
 ## Tests
 
