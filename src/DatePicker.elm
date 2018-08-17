@@ -57,6 +57,7 @@ Or
 import Html.Events exposing (onClick, onInput, onMouseOver)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events.Extra exposing (onEnter)
 import DateCore exposing (..)
 import Date exposing (..)
 import Task
@@ -347,7 +348,16 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
         case date of
             Just _ ->
                 if config.validDate date currentDate then
-                    td [ class config.dayClass, classList [ ( config.validClass, not selected ), ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
+                    td
+                        [ class config.dayClass
+                        , classList [ ( config.validClass, not selected ), ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ]
+                        , onClick (SelectDate date)
+                        , onMouseOver (OverDate date)
+                        , tabindex 0
+                        , attribute "role" "button"
+                        , onEnter (SelectDate date)
+                        ]
+                        [ text <| DateCore.getFormattedDate date ]
                 else
                     td [ class (config.dayClass ++ " " ++ config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
 
