@@ -311,7 +311,15 @@ dateFromString s =
 
 formatDate : Int -> Int -> Int -> String
 formatDate year month day =
-    toString year ++ "-" ++ toString month ++ "-" ++ toString day
+    toString year ++ "-" ++ formatWithZero (toString month) ++ "-" ++ formatWithZero (toString day) ++ "T00:00:00"
+
+
+formatWithZero : String -> String
+formatWithZero date =
+    if String.length date == 1 then
+        "0" ++ date
+    else
+        date
 
 
 dateToSring : Date -> String
