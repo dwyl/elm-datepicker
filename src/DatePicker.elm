@@ -136,6 +136,10 @@ type Msg
       - **"ddd"**: Mon, Tue, Wed, Thu, Fri, Sat, Sun
       - **"D"**: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 
+  - **weekdayFormatter**: Custom implementation of `weekdayFormat`, needed to support non-english languages.
+
+  - **titleFormatter**: Format title based on year and month.
+
   - **validDate**: A function that takes a single date, and the current date, and returns true if that date is available to select,
     or false if not.
 
@@ -150,6 +154,8 @@ type alias Config =
     , calendarClass : String
     , titleClass : String
     , weekdayFormat : String
+    , weekdayFormatter : String -> Day -> String
+    , titleFormatter : Int -> Month -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
@@ -200,6 +206,8 @@ initCalendar selection =
         , calendarClass = "pa3 dib gray"
         , titleClass = "tc"
         , weekdayFormat = "ddd"
+        , weekdayFormatter = defaultWeekdayFormatter
+        , titleFormatter = defaultTitleFormatter
         , validDate = validDate
         }
 
@@ -223,8 +231,71 @@ defaultConfig =
     , calendarClass = "pa3 dib gray"
     , titleClass = "tc"
     , weekdayFormat = "ddd"
+    , weekdayFormatter = defaultWeekdayFormatter
+    , titleFormatter = defaultTitleFormatter
     , validDate = validDate
     }
+
+
+defaultTitleFormatter : Int -> Month -> String
+defaultTitleFormatter year month =
+    toString year ++ " " ++ toString month
+
+
+defaultWeekdayFormatter : String -> Day -> String
+defaultWeekdayFormatter format day =
+    case format of
+        "d" ->
+            String.left 1 (toString day)
+
+        "ddd" ->
+            toString day
+
+        "D" ->
+            case day of
+                Mon ->
+                    "Monday"
+
+                Tue ->
+                    "Tuesday"
+
+                Wed ->
+                    "Wednesday"
+
+                Thu ->
+                    "Thursday"
+
+                Fri ->
+                    "Friday"
+
+                Sat ->
+                    "Saturday"
+
+                Sun ->
+                    "Sunday"
+
+        _ ->
+            case day of
+                Mon ->
+                    "M"
+
+                Tue ->
+                    "Tu"
+
+                Wed ->
+                    "W"
+
+                Thu ->
+                    "Th"
+
+                Fri ->
+                    "F"
+
+                Sat ->
+                    "Sa"
+
+                Sun ->
+                    "Su"
 
 
 validDate : Maybe Date -> Maybe Date -> Bool
@@ -347,9 +418,12 @@ showCalendar (DatePicker model) monthData config =
     let
         ( year, month, dates ) =
             monthData
+
+        title =
+            config.titleFormatter year month
     in
         div [ class config.calendarClass ]
-            [ h1 [ class config.titleClass, id "title" ] [ text (toString year ++ " " ++ toString month) ]
+            [ h1 [ class config.titleClass, id "title" ] [ text title ]
             , table []
                 [ thead []
                     [ tr []
@@ -364,20 +438,12 @@ renderWeekdays : Config -> List (Html Msg)
 renderWeekdays config =
     let
         days =
-            case config.weekdayFormat of
-                "d" ->
-                    [ "M", "T", "W", "T", "F", "S", "S" ]
+            [ Mon, Tue, Wed, Thu, Fri, Sat, Sun ]
 
-                "ddd" ->
-                    [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
-
-                "D" ->
-                    [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
-
-                _ ->
-                    [ "M", "Tu", "W", "Th", "F", "Sa", "Su" ]
+        format =
+            config.weekdayFormatter config.weekdayFormat
     in
-        List.map (\day -> td [ class config.dayClass ] [ text day ]) days
+        List.map (\day -> td [ class config.dayClass ] [ format day |> text ]) days
 
 
 {-| The DatePicker update function
