@@ -354,7 +354,8 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
                         , onClick (SelectDate date)
                         , onMouseOver (OverDate date)
                         , tabindex 0
-                        , attribute "role" "button"
+                        , attribute "role" "option"
+                        , attribute "aria-selected" <| toString selected
                         , onEnter (SelectDate date)
                         ]
                         [ text <| DateCore.getFormattedDate date ]
@@ -431,6 +432,9 @@ showCalendar (DatePicker model) monthData config =
 
         title =
             config.titleFormatter year month
+
+        multiselectable =
+            model.selectDate /= Only |> toString
     in
         div [ class config.calendarClass ]
             [ h1 [ class config.titleClass, id "title" ] [ text title ]
@@ -439,7 +443,11 @@ showCalendar (DatePicker model) monthData config =
                     [ tr []
                         (renderWeekdays config)
                     ]
-                , tbody [] (showMonth (DatePicker model) config dates)
+                , tbody
+                    [ attribute "role" "listbox"
+                    , attribute "aria-multiselectable" multiselectable
+                    ]
+                    (showMonth (DatePicker model) config dates)
                 ]
             ]
 
