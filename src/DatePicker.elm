@@ -349,7 +349,7 @@ showCalendar (DatePicker model) monthData config =
             monthData
     in
         div [ class config.calendarClass ]
-            [ h1 [ class config.titleClass, id "title" ] [ text (toString year ++ " " ++ toString month) ]
+            [ h1 [ class config.titleClass, id "title" ] [ text (toString month ++ " " ++ toString year) ]
             , table []
                 [ thead []
                     [ tr []
