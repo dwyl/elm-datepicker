@@ -57,6 +57,7 @@ Or
 import Html.Events exposing (onClick, onInput, onMouseOver)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events.Extra exposing (onEnter)
 import DateCore exposing (..)
 import Date exposing (..)
 import Task
@@ -347,7 +348,17 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
         case date of
             Just _ ->
                 if config.validDate date currentDate then
-                    td [ class config.dayClass, classList [ ( config.validClass, not selected ), ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ], onClick (SelectDate date), onMouseOver (OverDate date) ] [ text <| DateCore.getFormattedDate date ]
+                    td
+                        [ class config.dayClass
+                        , classList [ ( config.validClass, not selected ), ( config.selectedClass, selected ), ( config.rangeClass, insideRange ), ( config.rangeHoverClass, insideRangeOver ) ]
+                        , onClick (SelectDate date)
+                        , onMouseOver (OverDate date)
+                        , tabindex 0
+                        , attribute "role" "option"
+                        , attribute "aria-selected" <| toString selected
+                        , onEnter (SelectDate date)
+                        ]
+                        [ text <| DateCore.getFormattedDate date ]
                 else
                     td [ class (config.dayClass ++ " " ++ config.disabledClass) ] [ text <| DateCore.getFormattedDate date ]
 
@@ -421,6 +432,9 @@ showCalendar (DatePicker model) monthData config =
 
         title =
             config.titleFormatter year month
+
+        multiselectable =
+            model.selectDate /= Only |> toString
     in
         div [ class config.calendarClass ]
             [ h1 [ class config.titleClass, id "title" ] [ text title ]
@@ -429,7 +443,11 @@ showCalendar (DatePicker model) monthData config =
                     [ tr []
                         (renderWeekdays config)
                     ]
-                , tbody [] (showMonth (DatePicker model) config dates)
+                , tbody
+                    [ attribute "role" "listbox"
+                    , attribute "aria-multiselectable" multiselectable
+                    ]
+                    (showMonth (DatePicker model) config dates)
                 ]
             ]
 
