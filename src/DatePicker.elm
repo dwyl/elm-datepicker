@@ -240,7 +240,7 @@ defaultConfig =
 
 defaultTitleFormatter : Int -> Month -> String
 defaultTitleFormatter year month =
-    toString year ++ " " ++ toString month
+    toString month ++ " " ++ toString year
 
 
 defaultWeekdayFormatter : String -> Day -> String

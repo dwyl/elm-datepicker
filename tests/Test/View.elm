@@ -98,7 +98,7 @@ suite =
                     calendarHtml
                         |> Query.fromHtml
                         |> Query.find [ tag "h1" ]
-                        |> Query.has [ text "2018 Jan", classes [ "tc" ] ]
+                        |> Query.has [ text "Jan 2018", classes [ "tc" ] ]
             , test "Default Html Days" <|
                 \_ ->
                     calendarHtml
