@@ -1,5 +1,6 @@
 module DateCore exposing
-    ( Year
+    ( Date
+    , Year
     , daysInMonth
     , equal
     , getFormattedDate
@@ -11,12 +12,18 @@ module DateCore exposing
     , inRange
     , lowerOrEqual
     , monthToInt
+    , monthToString
     , nothingToMonday
     , nothingToSunday
     , toDate
     )
 
-import Date exposing (..)
+import Iso8601
+import Time exposing (Month(..), Posix, Weekday(..))
+
+
+type alias Date =
+    Posix
 
 
 type alias Year =
@@ -25,10 +32,10 @@ type alias Year =
 
 isLeapYear : Int -> Bool
 isLeapYear year =
-    ((modBy 4 year == 0) && (modBy 100 year /= 0)) || ((modBy 400 year) == 0)
+    ((modBy 4 year == 0) && (modBy 100 year /= 0)) || (modBy 400 year == 0)
 
 
-indexOfDay : Day -> Int
+indexOfDay : Weekday -> Int
 indexOfDay day =
     case day of
         Mon ->
@@ -53,7 +60,7 @@ indexOfDay day =
             6
 
 
-daysInMonth : Int -> Date.Month -> Int
+daysInMonth : Int -> Month -> Int
 daysInMonth year month =
     case month of
         Jan ->
@@ -137,6 +144,46 @@ monthToInt month =
             12
 
 
+monthToString : Month -> String
+monthToString month =
+    case month of
+        Jan ->
+            "Jan"
+
+        Feb ->
+            "Feb"
+
+        Mar ->
+            "Mar"
+
+        Apr ->
+            "Apr"
+
+        May ->
+            "May"
+
+        Jun ->
+            "Jun"
+
+        Jul ->
+            "Jul"
+
+        Aug ->
+            "Aug"
+
+        Sep ->
+            "Sep"
+
+        Oct ->
+            "Oct"
+
+        Nov ->
+            "Nov"
+
+        Dec ->
+            "Dec"
+
+
 monthFromInt : Int -> Maybe Month
 monthFromInt month =
     case month of
@@ -198,7 +245,7 @@ getFormattedDate : Maybe Date -> String
 getFormattedDate date =
     case date of
         Just d ->
-            toString <| Date.day d
+            String.fromInt <| toDay d
 
         Nothing ->
             ""
@@ -206,14 +253,14 @@ getFormattedDate date =
 
 formatDatePill : Date -> String
 formatDatePill date =
-    toString (Date.day date) ++ " " ++ toString (Date.month date)
+    String.fromInt (toDay date) ++ " " ++ String.fromInt (monthToInt (toMonth date))
 
 
 getYearAndMonth : Maybe Date -> ( Year, Month )
 getYearAndMonth date =
     case date of
         Just d ->
-            ( Date.year d, Date.month d )
+            ( toYear d, toMonth d )
 
         Nothing ->
             ( 2018, Jan )
@@ -225,10 +272,10 @@ get18monthDate date =
         Just d ->
             let
                 totalMonths =
-                    monthToInt (Date.month d) + 6
+                    monthToInt (toMonth d) + 6
 
                 year =
-                    Date.year d + (totalMonths // 12) + 1
+                    toYear d + (totalMonths // 12) + 1
 
                 monthIndex =
                     modBy 12 totalMonths
@@ -245,11 +292,11 @@ get18monthDate date =
                     daysInMonth year month
 
                 formattedDate =
-                    toString year ++ "-" ++ toString month ++ "-" ++ toString lastDay
+                    String.fromInt year ++ "-" ++ String.fromInt (monthToInt month) ++ "-" ++ String.fromInt lastDay
             in
-            case Date.fromString formattedDate of
-                Ok d ->
-                    Just d
+            case Iso8601.toTime formattedDate of
+                Ok d_ ->
+                    Just d_
 
                 Err _ ->
                     Nothing
@@ -264,7 +311,7 @@ getNextDay date =
         Just d ->
             let
                 nextDay =
-                    Date.fromTime (Date.toTime d + (24 * 60 * 60 * 1000))
+                    Time.millisToPosix (Time.posixToMillis d + (24 * 60 * 60 * 1000))
             in
             Just nextDay
 
@@ -318,7 +365,7 @@ getYearAndMonthPrevious year month =
 
 dateFromString : String -> Maybe Date
 dateFromString s =
-    case Date.fromString s of
+    case Iso8601.toTime s of
         Ok d ->
             Just d
 
@@ -328,7 +375,7 @@ dateFromString s =
 
 formatDate : Int -> Int -> Int -> String
 formatDate year month day =
-    toString year ++ "-" ++ formatWithZero (toString month) ++ "-" ++ formatWithZero (toString day) ++ "T00:00:00"
+    String.fromInt year ++ "-" ++ formatWithZero (String.fromInt month) ++ "-" ++ formatWithZero (String.fromInt day) ++ "T00:00:00Z"
 
 
 formatWithZero : String -> String
@@ -342,7 +389,7 @@ formatWithZero date =
 
 dateToSring : Date -> String
 dateToSring date =
-    formatDate (Date.year date) (monthToInt (Date.month date)) (Date.day date)
+    formatDate (toYear date) (monthToInt (toMonth date)) (toDay date)
 
 
 toDate : Int -> Int -> Int -> Maybe Date
@@ -354,7 +401,7 @@ nothingToMonday : Maybe (Maybe Date) -> List (Maybe Date)
 nothingToMonday date =
     case date of
         Just (Just d) ->
-            List.repeat (indexOfDay (Date.dayOfWeek d)) Nothing
+            List.repeat (indexOfDay (toWeekday d)) Nothing
 
         Just Nothing ->
             []
@@ -369,7 +416,7 @@ nothingToSunday date =
         Just (Just d) ->
             let
                 reps =
-                    6 - indexOfDay (Date.dayOfWeek d)
+                    6 - indexOfDay (toWeekday d)
             in
             List.repeat reps Nothing
 
@@ -382,7 +429,7 @@ nothingToSunday date =
 
 toTime : Date -> Int
 toTime =
-    floor << Date.toTime
+    Time.posixToMillis
 
 
 equal : Date -> Date -> Bool
@@ -436,3 +483,23 @@ inRange d d1 d2 =
 
     else
         False
+
+
+toYear : Date -> Int
+toYear =
+    Time.toYear Time.utc
+
+
+toMonth : Date -> Month
+toMonth =
+    Time.toMonth Time.utc
+
+
+toDay : Date -> Int
+toDay =
+    Time.toDay Time.utc
+
+
+toWeekday : Date -> Weekday
+toWeekday =
+    Time.toWeekday Time.utc
