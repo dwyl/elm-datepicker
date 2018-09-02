@@ -252,11 +252,6 @@ getFormattedDate date =
             ""
 
 
-formatDatePill : Date -> String
-formatDatePill date =
-    String.fromInt (toDay date) ++ " " ++ String.fromInt (monthToInt (toMonth date))
-
-
 getYearAndMonth : Maybe Date -> ( Year, Month )
 getYearAndMonth date =
     case date of
@@ -265,59 +260,6 @@ getYearAndMonth date =
 
         Nothing ->
             ( 2018, Jan )
-
-
-get18monthDate : Maybe Date -> Maybe Date
-get18monthDate date =
-    case date of
-        Just d ->
-            let
-                totalMonths =
-                    monthToInt (toMonth d) + 6
-
-                year =
-                    toYear d + (totalMonths // 12) + 1
-
-                monthIndex =
-                    modBy 12 totalMonths
-
-                month =
-                    case monthFromInt monthIndex of
-                        Just m ->
-                            m
-
-                        Nothing ->
-                            Dec
-
-                lastDay =
-                    daysInMonth year month
-
-                formattedDate =
-                    String.fromInt year ++ "-" ++ String.fromInt (monthToInt month) ++ "-" ++ String.fromInt lastDay
-            in
-            case Iso8601.toTime formattedDate of
-                Ok d_ ->
-                    Just d_
-
-                Err _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
-
-
-getNextDay : Maybe Date -> Maybe Date
-getNextDay date =
-    case date of
-        Just d ->
-            let
-                nextDay =
-                    Time.millisToPosix (Time.posixToMillis d + (24 * 60 * 60 * 1000))
-            in
-            Just nextDay
-
-        Nothing ->
-            Nothing
 
 
 getYearAndMonthNext : Year -> Month -> ( Year, Month )
