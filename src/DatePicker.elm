@@ -40,7 +40,7 @@ import DateCore exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onMouseOver)
-import Html.Events.Extra exposing (onEnter)
+import Json.Decode
 import Task
 
 
@@ -646,3 +646,19 @@ receiveDate =
 setDate : Date -> DatePicker -> DatePicker
 setDate date =
     update (SelectDate (Just date))
+
+
+{-| When the enter key is released, send the `msg`. Otherwise, do nothing.
+-}
+onEnter : msg -> Html.Attribute msg
+onEnter onEnterAction =
+    Html.Events.on "keyup" <|
+        Json.Decode.andThen
+            (\keyCode ->
+                if keyCode == 13 then
+                    Json.Decode.succeed onEnterAction
+
+                else
+                    Json.Decode.fail (String.fromInt keyCode)
+            )
+            Html.Events.keyCode
