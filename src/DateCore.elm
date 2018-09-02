@@ -1,4 +1,20 @@
-module DateCore exposing (..)
+module DateCore exposing
+    ( Year
+    , daysInMonth
+    , equal
+    , getFormattedDate
+    , getYearAndMonth
+    , getYearAndMonthNext
+    , getYearAndMonthPrevious
+    , greaterOrEqual
+    , groupByWeek
+    , inRange
+    , lowerOrEqual
+    , monthToInt
+    , nothingToMonday
+    , nothingToSunday
+    , toDate
+    )
 
 import Date exposing (..)
 
@@ -9,7 +25,7 @@ type alias Year =
 
 isLeapYear : Int -> Bool
 isLeapYear year =
-    ((year % 4 == 0) && (year % 100 /= 0)) || ((year % 400) == 0)
+    ((modBy 4 year == 0) && (modBy 100 year /= 0)) || ((modBy 400 year) == 0)
 
 
 indexOfDay : Day -> Int
@@ -46,6 +62,7 @@ daysInMonth year month =
         Feb ->
             if isLeapYear year then
                 29
+
             else
                 28
 
@@ -172,9 +189,9 @@ groupByWeek l =
                     List.reverse res
 
                 _ ->
-                    group ((List.take 7 tail) :: res) (List.drop 7 tail)
+                    group (List.take 7 tail :: res) (List.drop 7 tail)
     in
-        group [] l
+    group [] l
 
 
 getFormattedDate : Maybe Date -> String
@@ -189,7 +206,7 @@ getFormattedDate date =
 
 formatDatePill : Date -> String
 formatDatePill date =
-    (toString (Date.day date)) ++ " " ++ (toString (Date.month date))
+    toString (Date.day date) ++ " " ++ toString (Date.month date)
 
 
 getYearAndMonth : Maybe Date -> ( Year, Month )
@@ -208,16 +225,16 @@ get18monthDate date =
         Just d ->
             let
                 totalMonths =
-                    (monthToInt (Date.month d)) + 6
+                    monthToInt (Date.month d) + 6
 
                 year =
-                    (Date.year d) + (totalMonths // 12) + 1
+                    Date.year d + (totalMonths // 12) + 1
 
                 monthIndex =
-                    totalMonths % 12
+                    modBy 12 totalMonths
 
                 month =
-                    case (monthFromInt monthIndex) of
+                    case monthFromInt monthIndex of
                         Just m ->
                             m
 
@@ -228,14 +245,14 @@ get18monthDate date =
                     daysInMonth year month
 
                 formattedDate =
-                    (toString year) ++ "-" ++ (toString month) ++ "-" ++ (toString lastDay)
+                    toString year ++ "-" ++ toString month ++ "-" ++ toString lastDay
             in
-                case (Date.fromString formattedDate) of
-                    Ok d ->
-                        Just d
+            case Date.fromString formattedDate of
+                Ok d ->
+                    Just d
 
-                    Err _ ->
-                        Nothing
+                Err _ ->
+                    Nothing
 
         Nothing ->
             Nothing
@@ -247,9 +264,9 @@ getNextDay date =
         Just d ->
             let
                 nextDay =
-                    Date.fromTime ((Date.toTime d) + (24 * 60 * 60 * 1000))
+                    Date.fromTime (Date.toTime d + (24 * 60 * 60 * 1000))
             in
-                Just nextDay
+            Just nextDay
 
         Nothing ->
             Nothing
@@ -264,17 +281,17 @@ getYearAndMonthNext year month =
         nextMonthIndex =
             monthFromInt (monthIndex + 1)
     in
-        case (monthIndex) of
-            12 ->
-                ( year + 1, Jan )
+    case monthIndex of
+        12 ->
+            ( year + 1, Jan )
 
-            _ ->
-                case nextMonthIndex of
-                    Just m ->
-                        ( year, m )
+        _ ->
+            case nextMonthIndex of
+                Just m ->
+                    ( year, m )
 
-                    Nothing ->
-                        ( year, Jan )
+                Nothing ->
+                    ( year, Jan )
 
 
 getYearAndMonthPrevious : Year -> Month -> ( Year, Month )
@@ -286,17 +303,17 @@ getYearAndMonthPrevious year month =
         prevMonthIndex =
             monthFromInt (monthIndex - 1)
     in
-        case monthIndex of
-            1 ->
-                ( year - 1, Dec )
+    case monthIndex of
+        1 ->
+            ( year - 1, Dec )
 
-            _ ->
-                case prevMonthIndex of
-                    Just m ->
-                        ( year, m )
+        _ ->
+            case prevMonthIndex of
+                Just m ->
+                    ( year, m )
 
-                    Nothing ->
-                        ( year, Jan )
+                Nothing ->
+                    ( year, Jan )
 
 
 dateFromString : String -> Maybe Date
@@ -318,6 +335,7 @@ formatWithZero : String -> String
 formatWithZero date =
     if String.length date == 1 then
         "0" ++ date
+
     else
         date
 
@@ -351,9 +369,9 @@ nothingToSunday date =
         Just (Just d) ->
             let
                 reps =
-                    6 - (indexOfDay (Date.dayOfWeek d))
+                    6 - indexOfDay (Date.dayOfWeek d)
             in
-                List.repeat reps Nothing
+            List.repeat reps Nothing
 
         Just Nothing ->
             []
@@ -382,7 +400,7 @@ lowerOrEqual d1 d2 =
             False
 
         ( Just date1, Just date2 ) ->
-            (toTime date1) <= (toTime date2)
+            toTime date1 <= toTime date2
 
 
 greater : Maybe Date -> Maybe Date -> Bool
@@ -392,7 +410,7 @@ greater d1 d2 =
             True
 
         ( Just date1, Just date2 ) ->
-            (toTime date1) > (toTime date2)
+            toTime date1 > toTime date2
 
         ( Nothing, Just _ ) ->
             False
@@ -405,7 +423,7 @@ greaterOrEqual d1 d2 =
             True
 
         ( Just date1, Just date2 ) ->
-            (toTime date1) >= (toTime date2)
+            toTime date1 >= toTime date2
 
         ( Nothing, Just _ ) ->
             False
@@ -413,7 +431,8 @@ greaterOrEqual d1 d2 =
 
 inRange : Maybe Date -> Maybe Date -> Maybe Date -> Bool
 inRange d d1 d2 =
-    if (greaterOrEqual d d1) && (lowerOrEqual d d2) then
+    if greaterOrEqual d d1 && lowerOrEqual d d2 then
         True
+
     else
         False
