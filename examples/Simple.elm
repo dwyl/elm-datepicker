@@ -1,10 +1,10 @@
-module Simple exposing (..)
+module Simple exposing (main)
 
+import Browser
+import DatePicker
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import DatePicker
-import Date exposing (Date)
 import Task
 
 
@@ -18,10 +18,10 @@ type Msg
     | NextMonth
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    program
-        { init = init
+    Browser.element
+        { init = always init
         , update = update
         , subscriptions = always Sub.none
         , view = view
@@ -50,10 +50,16 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DatePickerMsg datePickerMsg ->
-            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []
+            ( { model | calendar = DatePicker.update datePickerMsg model.calendar }
+            , Cmd.none
+            )
 
         PreviousMonth ->
-            { model | calendar = DatePicker.previousMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.previousMonth model.calendar }
+            , Cmd.none
+            )
 
         NextMonth ->
-            { model | calendar = DatePicker.nextMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.nextMonth model.calendar }
+            , Cmd.none
+            )

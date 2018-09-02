@@ -1,11 +1,12 @@
-module Dropdown exposing (..)
+module Dropdown exposing (main)
 
+import Browser
+import DatePicker exposing (Date)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import DatePicker
-import Date exposing (Date)
 import Task
+import Time
 
 
 type alias Model =
@@ -20,10 +21,10 @@ type Msg
     | ClearDate
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    program
-        { init = init
+    Browser.element
+        { init = always init
         , update = update
         , subscriptions = always Sub.none
         , view = view
@@ -48,16 +49,16 @@ view model =
                 Nothing ->
                     noDate "Select Date"
     in
-        div [ class "dib w-50 w-third-l relative b--moon-gray" ]
-            [ h2 [ class "helvetica" ] [ text "Dropdown DatePicker" ]
-            , title
-            , div
-                [ classList [ ( "dn", not (DatePicker.isOpen model.calendar) ), ( "dib", DatePicker.isOpen model.calendar ) ], class "absolute top-3 left-0 bg-white w-100 ba b--moon-gray pt2 pb3 z-3" ]
-                [ span [ class "pointer pa2 gray bn pointer", onClick PreviousMonth ] [ text "<" ]
-                , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) (config) |> Html.map DatePickerMsg
-                , span [ class "pointer pa2 gray bn pointer", onClick NextMonth ] [ text ">" ]
-                ]
+    div [ class "dib w-50 w-third-l relative b--moon-gray" ]
+        [ h2 [ class "helvetica" ] [ text "Dropdown DatePicker" ]
+        , title
+        , div
+            [ classList [ ( "dn", not (DatePicker.isOpen model.calendar) ), ( "dib", DatePicker.isOpen model.calendar ) ], class "absolute top-3 left-0 bg-white w-100 ba b--moon-gray pt2 pb3 z-3" ]
+            [ span [ class "pointer pa2 gray bn pointer", onClick PreviousMonth ] [ text "<" ]
+            , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config |> Html.map DatePickerMsg
+            , span [ class "pointer pa2 gray bn pointer", onClick NextMonth ] [ text ">" ]
             ]
+        ]
 
 
 singleDate : Date -> Html Msg
@@ -66,7 +67,7 @@ singleDate date =
         [ div
             [ class "bg-light-gray ba b--moon-gray br-pill flex justify-between items-center overflow-hidden ml1-l" ]
             [ p [ class "pointer ph2 ml3 f6" ]
-                [ text <| (formatDate date) ]
+                [ text <| formatDate date ]
             , p [ onClick ClearDate, class "bg-light-gray ph2 pointer br-pill mr3 f6" ] [ text "X" ]
             ]
         ]
@@ -81,21 +82,21 @@ noDate whenText =
 
 
 formatDate : Date -> String
-formatDate date =
-    (toString (Date.day date)) ++ " " ++ (toString (Date.month date)) ++ " " ++ (toString (Date.year date))
+formatDate =
+    DatePicker.dateToString
 
 
 config : DatePicker.Config
 config =
     let
-        config =
+        config_ =
             DatePicker.defaultConfig
     in
-        { config
-            | selectedClass = "bg-moon-gray white selected"
-            , weekdayFormat = "ddd"
-            , validDate = validDate
-        }
+    { config_
+        | selectedClass = "bg-moon-gray white selected"
+        , weekdayFormat = "ddd"
+        , validDate = validDate
+    }
 
 
 validDate : Maybe Date -> Maybe Date -> Bool
@@ -105,7 +106,7 @@ validDate date currentDate =
             True
 
         ( Just date1, Just date2 ) ->
-            (Date.toTime date1) > (Date.toTime date2)
+            Time.posixToMillis date1 > Time.posixToMillis date2
 
         ( Nothing, Just _ ) ->
             False
@@ -119,16 +120,26 @@ update msg model =
                 newCalendar =
                     DatePicker.update datePickerMsg model.calendar
             in
-                { model | calendar = newCalendar, selectedDate = DatePicker.getSelectedDate newCalendar } ! []
+            ( { model | calendar = newCalendar, selectedDate = DatePicker.getSelectedDate newCalendar }
+            , Cmd.none
+            )
 
         PreviousMonth ->
-            { model | calendar = DatePicker.previousMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.previousMonth model.calendar }
+            , Cmd.none
+            )
 
         NextMonth ->
-            { model | calendar = DatePicker.nextMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.nextMonth model.calendar }
+            , Cmd.none
+            )
 
         Toggle ->
-            { model | calendar = DatePicker.toggleCalendar model.calendar } ! []
+            ( { model | calendar = DatePicker.toggleCalendar model.calendar }
+            , Cmd.none
+            )
 
         ClearDate ->
-            { model | calendar = DatePicker.clearDates model.calendar, selectedDate = Nothing } ! []
+            ( { model | calendar = DatePicker.clearDates model.calendar, selectedDate = Nothing }
+            , Cmd.none
+            )

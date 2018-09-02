@@ -2,6 +2,7 @@ module DatePicker exposing
     ( DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection(..), receiveDate
     , getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
     , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
+    , Date, dateToString
     )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
@@ -35,7 +36,7 @@ Or
 
 -}
 
-import DateCore exposing (..)
+import DateCore exposing (Year)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onMouseOver)
@@ -509,7 +510,7 @@ update msg (DatePicker model) =
                     getDates year1 month1
 
                 ( year2, month2 ) =
-                    getYearAndMonthNext year1 month1
+                    DateCore.getYearAndMonthNext year1 month1
 
                 nextMonth_ =
                     getDates year2 month2
@@ -525,7 +526,7 @@ update msg (DatePicker model) =
                     model.month
 
                 ( prevYear, prevMonth ) =
-                    getYearAndMonthPrevious year month
+                    DateCore.getYearAndMonthPrevious year month
 
                 prevData =
                     getDates prevYear prevMonth
@@ -538,7 +539,7 @@ update msg (DatePicker model) =
                     model.nextMonth
 
                 ( nextYear, nextMonth_ ) =
-                    getYearAndMonthNext year month
+                    DateCore.getYearAndMonthNext year month
 
                 nextData =
                     getDates nextYear nextMonth_
@@ -715,3 +716,8 @@ boolToString bool =
 
     else
         "false"
+
+
+dateToString : Date -> String
+dateToString =
+    DateCore.readableDate

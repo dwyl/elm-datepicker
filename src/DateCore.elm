@@ -15,6 +15,7 @@ module DateCore exposing
     , monthToString
     , nothingToMonday
     , nothingToSunday
+    , readableDate
     , toDate
     )
 
@@ -503,3 +504,12 @@ toDay =
 toWeekday : Date -> Weekday
 toWeekday =
     Time.toWeekday Time.utc
+
+
+readableDate : Date -> String
+readableDate posix =
+    [ String.fromInt (toDay posix)
+    , monthToString (toMonth posix)
+    , String.fromInt (toYear posix)
+    ]
+        |> String.join " "
