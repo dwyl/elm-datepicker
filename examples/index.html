@@ -27,8 +27,21 @@
     Array.prototype.slice
   .apply(document.getElementsByClassName("example"))
   .forEach(ex =>
-    ex.addEventListener("click", e =>
-      Elm[e.target.hash.slice(1)].embed(document.getElementById("example"))
+      ex.addEventListener("click", e => {
+        var example = document.getElementById("example")
+        while (example.hasChildNodes()) {
+            example.removeChild(example.lastChild)
+        }
+
+        var newItem = document.createElement("DIV")
+        var newId = "newExample"
+        newItem.id = newId
+        example.appendChild(newItem)
+
+        Elm[e.target.hash.slice(1)].init({
+            node: document.getElementById(newId)
+        })
+      }
     )
   );
 </script>
