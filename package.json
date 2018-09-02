@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "node_modules/.bin/elm make examples/*.elm --output=examples/example.js",
+    "postinstall": "cd examples && ../node_modules/.bin/elm make *.elm --output=example.js && cd ..",
     "start": "node_modules/.bin/http-server ./examples"
   },
   "repository": {
