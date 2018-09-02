@@ -142,7 +142,7 @@ type alias Config =
     , titleClass : String
     , weekdayFormat : String
     , weekdayFormatter : String -> Weekday -> String
-    , titleFormatter : Int -> Month -> String
+    , titleFormatter : Year -> Month -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
@@ -226,7 +226,7 @@ defaultConfig =
     }
 
 
-defaultTitleFormatter : Int -> Month -> String
+defaultTitleFormatter : Year -> Month -> String
 defaultTitleFormatter year month =
     DateCore.monthToString month ++ " " ++ String.fromInt year
 

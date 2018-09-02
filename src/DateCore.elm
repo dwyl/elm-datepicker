@@ -31,7 +31,7 @@ type alias Year =
     Int
 
 
-isLeapYear : Int -> Bool
+isLeapYear : Year -> Bool
 isLeapYear year =
     ((modBy 4 year == 0) && (modBy 100 year /= 0)) || (modBy 400 year == 0)
 
@@ -61,7 +61,7 @@ indexOfDay day =
             6
 
 
-daysInMonth : Int -> Month -> Int
+daysInMonth : Year -> Month -> Int
 daysInMonth year month =
     case month of
         Jan ->
