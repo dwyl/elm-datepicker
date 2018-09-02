@@ -1,12 +1,12 @@
 module Dropdown exposing (main)
 
 import Browser
-import DatePicker exposing (Date)
+import Date exposing (Date)
+import DatePicker
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Task
-import Time
 
 
 type alias Model =
@@ -106,7 +106,7 @@ validDate date currentDate =
             True
 
         ( Just date1, Just date2 ) ->
-            Time.posixToMillis date1 > Time.posixToMillis date2
+            Date.toRataDie date1 > Date.toRataDie date2
 
         ( Nothing, Just _ ) ->
             False
