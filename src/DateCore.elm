@@ -1,6 +1,5 @@
 module DateCore exposing
     ( Year
-    , dateToString
     , datesOfMonth
     , equal
     , getFormattedDate
@@ -15,8 +14,9 @@ module DateCore exposing
     , nothingToSunday
     )
 
-import Date exposing (Date, Month(..), Weekday(..))
+import Date exposing (Date)
 import Date.RataDie
+import Time exposing (Month(..))
 
 
 type alias Year =
@@ -81,7 +81,7 @@ datesOfMonth year month =
 monthToString : Month -> String
 monthToString month =
     Date.fromCalendarDate 2018 month 1
-        |> Date.toFormattedString "MMM"
+        |> Date.format "MMM"
 
 
 groupByWeek : List (Maybe Date) -> List (List (Maybe Date))
@@ -116,13 +116,9 @@ getYearAndMonthPrevious year month =
 
 addMonths : Int -> ( Year, Month ) -> ( Year, Month )
 addMonths numMonthsToAdd ( year, month ) =
-    let
-        modifiedDate =
-            Date.fromCalendarDate year month 1
-                |> Date.add Date.Months numMonthsToAdd
-                |> Date.toCalendarDate
-    in
-    ( modifiedDate.year, modifiedDate.month )
+    Date.fromCalendarDate year month 1
+        |> Date.add Date.Months numMonthsToAdd
+        |> (\date -> ( Date.year date, Date.month date ))
 
 
 nothingToMonday : Maybe Date -> List (Maybe Date)
@@ -184,12 +180,3 @@ greaterOrEqual d1 d2 =
 inRange : Maybe Date -> Maybe Date -> Maybe Date -> Bool
 inRange date start end =
     greaterOrEqual date start && lowerOrEqual date end
-
-
-dateToString : Date -> String
-dateToString date =
-    let
-        calendar =
-            Date.toCalendarDate date
-    in
-    String.fromInt calendar.day ++ " " ++ monthToString calendar.month ++ " " ++ String.fromInt calendar.year

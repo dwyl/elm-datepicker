@@ -83,7 +83,7 @@ noDate whenText =
 
 formatDate : Date -> String
 formatDate =
-    DatePicker.dateToString
+    Date.format "d MMM y"
 
 
 config : DatePicker.Config

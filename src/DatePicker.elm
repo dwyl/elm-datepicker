@@ -2,7 +2,6 @@ module DatePicker exposing
     ( DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection(..), receiveDate
     , getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
     , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
-    , dateToString
     )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
@@ -36,13 +35,14 @@ Or
 
 -}
 
-import Date exposing (Date, Month(..), Weekday(..))
+import Date exposing (Date)
 import DateCore exposing (Year)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onMouseOver)
 import Json.Decode
 import Task
+import Time exposing (Month(..), Weekday(..))
 
 
 type alias MonthData =
@@ -236,16 +236,16 @@ defaultWeekdayFormatter format day =
     case format of
         "d" ->
             dateOnGivenWeekday
-                |> Date.toFormattedString "EEE"
+                |> Date.format "EEE"
                 |> String.left 1
 
         "ddd" ->
             dateOnGivenWeekday
-                |> Date.toFormattedString "EEE"
+                |> Date.format "EEE"
 
         "D" ->
             dateOnGivenWeekday
-                |> Date.toFormattedString "EEEE"
+                |> Date.format "EEEE"
 
         _ ->
             case day of
@@ -631,8 +631,3 @@ boolToString bool =
 
     else
         "false"
-
-
-dateToString : Date -> String
-dateToString =
-    DateCore.dateToString
