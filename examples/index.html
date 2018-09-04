@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>DatePicker Example</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.9.1/tachyons.min.css" />
+    
   </head>
   <body>
     <div id="example-list" class="fl w-20-l w-30 bg-light-gray min-vh-100 helvetica">
@@ -17,20 +18,23 @@
       <h2 class="ml2">Documentation</h2>
       <a href="http://package.elm-lang.org/packages/dwyl/elm-datepicker/latest" class="db ma3 link blue hover-red f5-l f3">Elm Package Docs</a>
       <a href="https://github.com/dwyl/elm-datepicker" class="db ma3 link blue hover-red f5-l f3">Github</a>
+      <a href="https://github.com/dwyl/elm-datepicker/issues" class="db ma3 link blue hover-green f5-l f3"><em>Please share your thoughts!</em></a>
     </div>
     <div class="w-100 tc">
       <div id="example" class="pa3">
       </div>
     </div>
     <script src="example.js"></script>
-    <script type="text/javascript">
-    Array.prototype.slice
-  .apply(document.getElementsByClassName("example"))
-  .forEach(ex =>
-    ex.addEventListener("click", e =>
-      Elm[e.target.hash.slice(1)].embed(document.getElementById("example"))
-    )
-  );
+<script type="text/javascript">
+  Array.prototype.slice
+    .apply(document.getElementsByClassName("example"))
+    .forEach(function (ex) {
+      ex.addEventListener("click", function (e) {
+        Elm[e.target.hash.slice(1)].embed(document.getElementById("example"));
+      });
+    });
+  // initially render the "Styled" example to avoid "blank page" on initial page load:
+  Elm['Styled'].embed(document.getElementById("example"));
 </script>
   </body>
 </html>

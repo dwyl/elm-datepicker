@@ -1,8 +1,12 @@
-## Elm DatePicker
+# Elm DatePicker
 
 A customisable Datepicker written in Elm.
 
 [![Build Status](https://travis-ci.org/dwyl/elm-datepicker.svg?branch=master)](https://travis-ci.org/dwyl/elm-datepicker)
+
+## Demo/Example: https://elm-datepicker.herokuapp.com/#Styled
+
+![demo-screenshot](https://user-images.githubusercontent.com/194400/45051747-d9203500-b07c-11e8-9408-a245c8f81363.png)
 
 ### Usage
 
@@ -76,16 +80,20 @@ validDate date currentDate =
 
 ## Examples
 
-To run the examples:
+To run the examples on your `localhost`, run the following:
 
+<!-- these instructions will need updating for v0.19 see: https://github.com/dwyl/elm-datepicker/issues/32 -->
 ```sh
-  elm make examples/*.elm --output=examples/example.js
-  elm-reactor
+git clone https://github.com/dwyl/elm-datepicker.git && cd elm-datepicker
+elm-package install -y
+npm install
+elm make examples/*.elm --output=examples/example.js
+elm-reactor
 ```
 
 Then visit `localhost:8000` and open `index.html`
 
-Alternatively, the examples are hosted on heroku at https://elm-datepicker.herokuapp.com/
+Alternatively, the examples are hosted on Heroku: https://elm-datepicker.herokuapp.com/#Styled
 
 ### Simple DatePicker
 
