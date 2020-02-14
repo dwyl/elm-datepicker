@@ -5,7 +5,6 @@ import DatePicker
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Task
 
 
 type alias Model =

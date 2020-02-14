@@ -39,7 +39,7 @@ import Date exposing (Date)
 import DateCore exposing (Year)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput, onMouseOver)
+import Html.Events exposing (onClick, onMouseOver)
 import Json.Decode
 import Task
 import Time exposing (Month(..), Weekday(..))

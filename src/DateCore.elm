@@ -15,7 +15,6 @@ module DateCore exposing
     )
 
 import Date exposing (Date)
-import Date.RataDie
 import Time exposing (Month(..))
 
 
