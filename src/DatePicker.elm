@@ -599,7 +599,7 @@ update msg (DatePicker model) =
                         _ ->
                             From
             in
-            DatePicker { model | from = Nothing, to = Nothing, single = Nothing, selectDate = selection }
+            DatePicker { model | from = Nothing, to = Nothing, single = Nothing, selectDate = selection, overDate = Nothing }
 
 
 {-| Get the `from` date in a selected range

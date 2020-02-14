@@ -3,7 +3,7 @@
     "name": "dwyl/elm-datepicker",
     "summary": "A customisable date picker written in Elm",
     "license": "BSD-3-Clause",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "exposed-modules": [
         "DatePicker"
     ],
