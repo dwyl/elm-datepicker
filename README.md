@@ -72,7 +72,7 @@ validDate date currentDate =
             True
 
         ( Just date1, Just date2 ) ->
-            (Date.toTime date1) > (Date.toTime date2)
+            Date.toRataDie date1 > Date.toRataDie date2
 
         ( Nothing, Just _ ) ->
             False
