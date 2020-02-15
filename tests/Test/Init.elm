@@ -1,19 +1,19 @@
 module Test.Init exposing (..)
 
-import Expect
-import Test exposing (..)
-import Date exposing (..)
 import DatePicker
     exposing
         ( DatePicker
         , Selection(..)
-        , initCalendar
         , getFrom
-        , getTo
-        , isOpen
         , getMonth
         , getNextMonth
+        , getTo
+        , initCalendar
+        , isOpen
         )
+import Expect
+import Test exposing (..)
+import Time exposing (Month(..))
 
 
 rangeCalendar : DatePicker
