@@ -3,6 +3,12 @@ sudo: false # don't need root access on Travis-CI (builds faster without sudo!)
 language: node_js # elm is installed from npm (see install below)
 node_js: node     # use "latest" version of Node.js
 
+# See https://github.com/cypress-io/cypress-example-kitchensink/blob/master/.travis.yml
+addons:
+  apt:
+    packages:
+      - libgconf-2-4
+
 cache:
   directories: # so subsequent builds run faster
     - elm-stuff/build-artifacts
