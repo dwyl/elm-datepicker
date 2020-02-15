@@ -85,10 +85,10 @@ To run the examples on your `localhost`, run the following:
 <!-- these instructions will need updating for v0.19 see: https://github.com/dwyl/elm-datepicker/issues/32 -->
 ```sh
 git clone https://github.com/dwyl/elm-datepicker.git && cd elm-datepicker
-elm-package install -y
 npm install
-elm make examples/*.elm --output=examples/example.js
-elm-reactor
+cd examples
+npx elm make *.elm --output=example.js
+npx elm reactor
 ```
 
 Then visit `localhost:8000` and open `index.html`
@@ -130,7 +130,6 @@ An example showing how to toggle the visibility of the datepicker, as well as ho
 First, ensure that you have the dependencies installed:
 
 ```sh
-elm-package install -y
 npm install
 ```
 
@@ -138,7 +137,7 @@ _Then_ run the elm tests on your `localhost`,
 using the following command in your Terminal:
 
 ```sh
-elm-test --verbose
+npx elm-test --verbose
 ```
 
 And run the cypress tests with:

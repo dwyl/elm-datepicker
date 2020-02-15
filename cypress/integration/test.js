@@ -62,15 +62,19 @@ describe("Testing Example App", function() {
     });
 
     it("should not select invalid day", function() {
-      getToday()
+      cy
+        .get("#previous-month")
         .click()
-        .should("not.have.class", "selected");
+        .get(`tbody > :nth-child(2) > :nth-child(1)`)
+        .click()
+        .should("not.have.attr", "aria-selected");
     });
 
     it("should select valid day", function() {
       getNextDay(todaysPosition())
         .click()
-        .should("have.class", "selected");
+        .invoke("attr", "aria-selected")
+        .should("equal", "true");
     });
 
     it("should deselect last day on new selection", function() {
@@ -79,16 +83,19 @@ describe("Testing Example App", function() {
         .click()
         .get(`tbody > :nth-child(2) > :nth-child(1)`)
         .click()
-        .should("have.class", "selected");
+        .invoke("attr", "aria-selected")
+        .should("equal", "true");
 
       cy
         .get(`tbody > :nth-child(2) > :nth-child(2)`)
         .click()
-        .should("have.class", "selected");
+        .invoke("attr", "aria-selected")
+        .should("equal", "true");
 
       cy
         .get(`tbody > :nth-child(2) > :nth-child(1)`)
-        .should("not.have.class", "selected");
+        .invoke("attr", "aria-selected")
+        .should("equal", "false");
     });
   });
 });
