@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-elm make examples/Simple.elm --output=examples/example.js
+cd examples
+elm make Simple.elm --output=example.js
+cd ..
 
-elm-reactor &
+npx elm reactor &
 
 $(npm bin)/cypress run
 
-pkill elm-reactor
+pkill elm
