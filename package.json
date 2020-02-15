@@ -11,7 +11,7 @@
     "node": "9.3.0"
   },
   "scripts": {
-    "test": "elm-test",
+    "test": "elm-test --verbose && ./cypress-tests.sh",
     "postinstall": "cd examples && ../node_modules/.bin/elm make *.elm --output=example.js && cd ..",
     "start": "node_modules/.bin/http-server ./examples"
   },
