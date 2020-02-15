@@ -11,8 +11,6 @@ addons:
 
 cache:
   directories: # so subsequent builds run faster
-    - elm-stuff/build-artifacts
-    - elm-stuff/packages
     - $HOME/.npm # https://stackoverflow.com/a/42523517/1148249
 
 before_install:
