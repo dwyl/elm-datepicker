@@ -102,12 +102,12 @@ describe("Testing Example App", function() {
 
 /* gets position of current day on calendar */
 function todaysPosition() {
-  var currentMonth = new Date(Date.now());
-  var today = currentMonth.getDate();
+  const currentMonth = new Date(Date.now());
+  const today = currentMonth.getDate();
 
   currentMonth.setDate(1);
-  var firstOfMonth = currentMonth.getDay();
-  var todaysIndex;
+  const firstOfMonth = currentMonth.getDay();
+  let todaysIndex;
 
   if (firstOfMonth > 0) {
     todaysIndex = today + (firstOfMonth - 1);
@@ -120,7 +120,7 @@ function todaysPosition() {
 }
 
 function getToday() {
-  var today = todaysPosition();
+  const today = todaysPosition();
   return cy.get(`tbody > :nth-child(${today[0]}) > :nth-child(${today[1]})`);
 }
 
@@ -134,7 +134,7 @@ function nextDayPosition(currentDay) {
 }
 
 function getNextDay(currentDay) {
-  var nextDay = nextDayPosition(currentDay);
+  const nextDay = nextDayPosition(currentDay);
 
   if (lastDay()) {
     return cy
@@ -149,7 +149,7 @@ function getNextDay(currentDay) {
 }
 
 function lastDay() {
-  var currentDate = new Date(Date.now());
+  const currentDate = new Date(Date.now());
 
   switch (currentDate.getMonth()) {
     case 1:
