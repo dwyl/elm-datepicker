@@ -71,7 +71,7 @@ describe("Testing Example App", function() {
     });
 
     it("should select valid day", function() {
-      getNextDay(todaysPosition())
+      getToday()
         .click()
         .invoke("attr", "aria-selected")
         .should("equal", "true");
@@ -101,7 +101,7 @@ describe("Testing Example App", function() {
 });
 
 /* gets position of current day on calendar */
-function todaysPosition() {
+function getToday() {
   const currentMonth = new Date();
   const today = currentMonth.getDate();
   const day = currentMonth.getDay();
@@ -110,57 +110,10 @@ function todaysPosition() {
   const firstOfMonth = currentMonth.getDay();
   const todaysIndex = today + (firstOfMonth === 0 ? 7 : firstOfMonth) - 1;
 
-  return [Math.ceil(todaysIndex / 7), day === 0 ? 7 : day];
-}
+  const xIndex = Math.ceil(todaysIndex / 7);
+  const yIndex = day === 0 ? 7 : day;
 
-function getToday() {
-  const today = todaysPosition();
-  return cy.get(`tbody > :nth-child(${today[0]}) > :nth-child(${today[1]})`);
-}
-
-/* Determines position of next day based on current day
-  and whether it's the last day of the week or month */
-function nextDayPosition(currentDay) {
-  if (todayIsLastDayOfMonth()) {
-    return [1, (currentDay[1] % 7) + 1]
-  }
-  const currentDayIsSunday = currentDay[1] === 7;
-
-  return [
-    todayIsLastDayOfMonth() ? 1 : (currentDayIsSunday ? currentDay[0] + 1 : currentDay[0]),
-    (currentDay[1] % 7) + 1
-  ];
-}
-
-function getNextDay(currentDay) {
-  const nextDay = nextDayPosition(currentDay);
-
-  if (todayIsLastDayOfMonth()) {
-    cy
-      .get("#next-month")
-      .click();
-  }
-
-  return cy.get(
-    `tbody > :nth-child(${nextDay[0]}) > :nth-child(${nextDay[1]})`
-  );
-}
-
-function todayIsLastDayOfMonth() {
-  const currentDate = new Date();
-  const today = currentDate.getDate();
-
-  switch (currentDate.getMonth()) {
-    case 1:
-      return today === 29 || today === 28;
-    case 3:
-    case 5:
-    case 8:
-    case 10:
-      return today === 30;
-    default:
-      return today === 31;
-  }
+  return cy.get(`tbody > :nth-child(${xIndex}) > :nth-child(${yIndex})`);
 }
 
 function getOverflowIndex(array, index) {
