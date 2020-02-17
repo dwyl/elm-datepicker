@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>DatePicker Example</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.9.1/tachyons.min.css" />
-    
   </head>
   <body>
     <div id="example-list" class="fl w-20-l w-30 bg-light-gray min-vh-100 helvetica">
@@ -25,16 +24,27 @@
       </div>
     </div>
     <script src="example.js"></script>
-<script type="text/javascript">
-  Array.prototype.slice
-    .apply(document.getElementsByClassName("example"))
-    .forEach(function (ex) {
-      ex.addEventListener("click", function (e) {
-        Elm[e.target.hash.slice(1)].embed(document.getElementById("example"));
-      });
-    });
-  // initially render the "Styled" example to avoid "blank page" on initial page load:
-  Elm['Styled'].embed(document.getElementById("example"));
+    <script type="text/javascript">
+    Array.prototype.slice
+  .apply(document.getElementsByClassName("example"))
+  .forEach(ex =>
+      ex.addEventListener("click", e => {
+        var example = document.getElementById("example")
+        while (example.hasChildNodes()) {
+            example.removeChild(example.lastChild)
+        }
+
+        var newItem = document.createElement("DIV")
+        var newId = "newExample"
+        newItem.id = newId
+        example.appendChild(newItem)
+
+        Elm[e.target.hash.slice(1)].init({
+            node: document.getElementById(newId)
+        })
+      }
+    )
+  );
 </script>
   </body>
 </html>

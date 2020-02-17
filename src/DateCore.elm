@@ -1,43 +1,33 @@
-module DateCore exposing (..)
+module DateCore exposing
+    ( Year
+    , datesOfMonth
+    , equal
+    , getFormattedDate
+    , getYearAndMonthNext
+    , getYearAndMonthPrevious
+    , greaterOrEqual
+    , groupByWeek
+    , inRange
+    , lowerOrEqual
+    , monthToString
+    , nothingToMonday
+    , nothingToSunday
+    )
 
-import Date exposing (..)
+import Date exposing (Date)
+import Time exposing (Month(..))
 
 
 type alias Year =
     Int
 
 
-isLeapYear : Int -> Bool
+isLeapYear : Year -> Bool
 isLeapYear year =
-    ((year % 4 == 0) && (year % 100 /= 0)) || ((year % 400) == 0)
+    ((modBy 4 year == 0) && (modBy 100 year /= 0)) || (modBy 400 year == 0)
 
 
-indexOfDay : Day -> Int
-indexOfDay day =
-    case day of
-        Mon ->
-            0
-
-        Tue ->
-            1
-
-        Wed ->
-            2
-
-        Thu ->
-            3
-
-        Fri ->
-            4
-
-        Sat ->
-            5
-
-        Sun ->
-            6
-
-
-daysInMonth : Int -> Date.Month -> Int
+daysInMonth : Year -> Month -> Int
 daysInMonth year month =
     case month of
         Jan ->
@@ -46,6 +36,7 @@ daysInMonth year month =
         Feb ->
             if isLeapYear year then
                 29
+
             else
                 28
 
@@ -80,87 +71,16 @@ daysInMonth year month =
             31
 
 
-monthToInt : Month -> Int
-monthToInt month =
-    case month of
-        Jan ->
-            1
-
-        Feb ->
-            2
-
-        Mar ->
-            3
-
-        Apr ->
-            4
-
-        May ->
-            5
-
-        Jun ->
-            6
-
-        Jul ->
-            7
-
-        Aug ->
-            8
-
-        Sep ->
-            9
-
-        Oct ->
-            10
-
-        Nov ->
-            11
-
-        Dec ->
-            12
+datesOfMonth : Year -> Month -> List Date
+datesOfMonth year month =
+    List.range 1 (daysInMonth year month)
+        |> List.map (Date.fromCalendarDate year month)
 
 
-monthFromInt : Int -> Maybe Month
-monthFromInt month =
-    case month of
-        1 ->
-            Just Jan
-
-        2 ->
-            Just Feb
-
-        3 ->
-            Just Mar
-
-        4 ->
-            Just Apr
-
-        5 ->
-            Just May
-
-        6 ->
-            Just Jun
-
-        7 ->
-            Just Jul
-
-        8 ->
-            Just Aug
-
-        9 ->
-            Just Sep
-
-        10 ->
-            Just Oct
-
-        11 ->
-            Just Nov
-
-        12 ->
-            Just Dec
-
-        _ ->
-            Nothing
+monthToString : Month -> String
+monthToString month =
+    Date.fromCalendarDate 2018 month 1
+        |> Date.format "MMM"
 
 
 groupByWeek : List (Maybe Date) -> List (List (Maybe Date))
@@ -172,248 +92,90 @@ groupByWeek l =
                     List.reverse res
 
                 _ ->
-                    group ((List.take 7 tail) :: res) (List.drop 7 tail)
+                    group (List.take 7 tail :: res) (List.drop 7 tail)
     in
-        group [] l
+    group [] l
 
 
 getFormattedDate : Maybe Date -> String
-getFormattedDate date =
-    case date of
-        Just d ->
-            toString <| Date.day d
-
-        Nothing ->
-            ""
-
-
-formatDatePill : Date -> String
-formatDatePill date =
-    (toString (Date.day date)) ++ " " ++ (toString (Date.month date))
-
-
-getYearAndMonth : Maybe Date -> ( Year, Month )
-getYearAndMonth date =
-    case date of
-        Just d ->
-            ( Date.year d, Date.month d )
-
-        Nothing ->
-            ( 2018, Jan )
-
-
-get18monthDate : Maybe Date -> Maybe Date
-get18monthDate date =
-    case date of
-        Just d ->
-            let
-                totalMonths =
-                    (monthToInt (Date.month d)) + 6
-
-                year =
-                    (Date.year d) + (totalMonths // 12) + 1
-
-                monthIndex =
-                    totalMonths % 12
-
-                month =
-                    case (monthFromInt monthIndex) of
-                        Just m ->
-                            m
-
-                        Nothing ->
-                            Dec
-
-                lastDay =
-                    daysInMonth year month
-
-                formattedDate =
-                    (toString year) ++ "-" ++ (toString month) ++ "-" ++ (toString lastDay)
-            in
-                case (Date.fromString formattedDate) of
-                    Ok d ->
-                        Just d
-
-                    Err _ ->
-                        Nothing
-
-        Nothing ->
-            Nothing
-
-
-getNextDay : Maybe Date -> Maybe Date
-getNextDay date =
-    case date of
-        Just d ->
-            let
-                nextDay =
-                    Date.fromTime ((Date.toTime d) + (24 * 60 * 60 * 1000))
-            in
-                Just nextDay
-
-        Nothing ->
-            Nothing
+getFormattedDate =
+    Maybe.map (Date.day >> String.fromInt)
+        >> Maybe.withDefault ""
 
 
 getYearAndMonthNext : Year -> Month -> ( Year, Month )
 getYearAndMonthNext year month =
-    let
-        monthIndex =
-            monthToInt month
-
-        nextMonthIndex =
-            monthFromInt (monthIndex + 1)
-    in
-        case (monthIndex) of
-            12 ->
-                ( year + 1, Jan )
-
-            _ ->
-                case nextMonthIndex of
-                    Just m ->
-                        ( year, m )
-
-                    Nothing ->
-                        ( year, Jan )
+    addMonths 1 ( year, month )
 
 
 getYearAndMonthPrevious : Year -> Month -> ( Year, Month )
 getYearAndMonthPrevious year month =
-    let
-        monthIndex =
-            monthToInt month
-
-        prevMonthIndex =
-            monthFromInt (monthIndex - 1)
-    in
-        case monthIndex of
-            1 ->
-                ( year - 1, Dec )
-
-            _ ->
-                case prevMonthIndex of
-                    Just m ->
-                        ( year, m )
-
-                    Nothing ->
-                        ( year, Jan )
+    addMonths -1 ( year, month )
 
 
-dateFromString : String -> Maybe Date
-dateFromString s =
-    case Date.fromString s of
-        Ok d ->
-            Just d
-
-        Err _ ->
-            Nothing
+addMonths : Int -> ( Year, Month ) -> ( Year, Month )
+addMonths numMonthsToAdd ( year, month ) =
+    Date.fromCalendarDate year month 1
+        |> Date.add Date.Months numMonthsToAdd
+        |> (\date -> ( Date.year date, Date.month date ))
 
 
-formatDate : Int -> Int -> Int -> String
-formatDate year month day =
-    toString year ++ "-" ++ formatWithZero (toString month) ++ "-" ++ formatWithZero (toString day) ++ "T00:00:00"
-
-
-formatWithZero : String -> String
-formatWithZero date =
-    if String.length date == 1 then
-        "0" ++ date
-    else
-        date
-
-
-dateToSring : Date -> String
-dateToSring date =
-    formatDate (Date.year date) (monthToInt (Date.month date)) (Date.day date)
-
-
-toDate : Int -> Int -> Int -> Maybe Date
-toDate year month day =
-    dateFromString <| formatDate year month day
-
-
-nothingToMonday : Maybe (Maybe Date) -> List (Maybe Date)
+nothingToMonday : Maybe Date -> List (Maybe Date)
 nothingToMonday date =
     case date of
-        Just (Just d) ->
-            List.repeat (indexOfDay (Date.dayOfWeek d)) Nothing
-
-        Just Nothing ->
-            []
+        Just d ->
+            List.repeat (Date.weekdayNumber d - 1) Nothing
 
         Nothing ->
             []
 
 
-nothingToSunday : Maybe (Maybe Date) -> List (Maybe Date)
+nothingToSunday : Maybe Date -> List (Maybe Date)
 nothingToSunday date =
     case date of
-        Just (Just d) ->
-            let
-                reps =
-                    6 - (indexOfDay (Date.dayOfWeek d))
-            in
-                List.repeat reps Nothing
-
-        Just Nothing ->
-            []
+        Just d ->
+            List.repeat (7 - Date.weekdayNumber d) Nothing
 
         Nothing ->
             []
 
 
-toTime : Date -> Int
-toTime =
-    floor << Date.toTime
+compareMaybeDate : Maybe Date -> Maybe Date -> Order
+compareMaybeDate date1 date2 =
+    case ( date1, date2 ) of
+        ( Nothing, Just _ ) ->
+            LT
+
+        ( Nothing, Nothing ) ->
+            EQ
+
+        ( Just _, Nothing ) ->
+            GT
+
+        ( Just d1, Just d2 ) ->
+            compare (Date.toRataDie d1) (Date.toRataDie d2)
 
 
-equal : Date -> Date -> Bool
-equal a b =
-    toTime a == toTime b
+equal : Maybe Date -> Maybe Date -> Bool
+equal date1 date2 =
+    compareMaybeDate date1 date2 == EQ
 
 
 lowerOrEqual : Maybe Date -> Maybe Date -> Bool
 lowerOrEqual d1 d2 =
-    case ( d1, d2 ) of
-        ( Nothing, _ ) ->
-            True
-
-        ( _, Nothing ) ->
-            False
-
-        ( Just date1, Just date2 ) ->
-            (toTime date1) <= (toTime date2)
+    List.member (compareMaybeDate d1 d2) [ LT, EQ ]
 
 
 greater : Maybe Date -> Maybe Date -> Bool
 greater d1 d2 =
-    case ( d1, d2 ) of
-        ( _, Nothing ) ->
-            True
-
-        ( Just date1, Just date2 ) ->
-            (toTime date1) > (toTime date2)
-
-        ( Nothing, Just _ ) ->
-            False
+    compareMaybeDate d1 d2 == GT
 
 
 greaterOrEqual : Maybe Date -> Maybe Date -> Bool
 greaterOrEqual d1 d2 =
-    case ( d1, d2 ) of
-        ( _, Nothing ) ->
-            True
-
-        ( Just date1, Just date2 ) ->
-            (toTime date1) >= (toTime date2)
-
-        ( Nothing, Just _ ) ->
-            False
+    List.member (compareMaybeDate d1 d2) [ EQ, GT ]
 
 
 inRange : Maybe Date -> Maybe Date -> Maybe Date -> Bool
-inRange d d1 d2 =
-    if (greaterOrEqual d d1) && (lowerOrEqual d d2) then
-        True
-    else
-        False
+inRange date start end =
+    greaterOrEqual date start && lowerOrEqual date end

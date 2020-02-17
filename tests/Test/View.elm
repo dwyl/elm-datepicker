@@ -1,20 +1,21 @@
 module Test.View exposing (..)
 
-import Test exposing (..)
-import Test.Html.Query as Query
-import Test.Html.Selector exposing (text, tag, classes)
-import Html exposing (Html)
 import Date exposing (..)
 import DatePicker
     exposing
-        ( DatePicker
-        , Selection(..)
+        ( Config
+        , DatePicker
         , Msg
+        , Selection(..)
+        , defaultConfig
         , initCalendar
         , showCalendar
-        , defaultConfig
-        , Config
         )
+import Html exposing (Html)
+import Test exposing (..)
+import Test.Html.Query as Query
+import Test.Html.Selector exposing (classes, tag, text)
+import Time exposing (Month(..), Weekday(..))
 
 
 rangeCalendar : DatePicker
@@ -32,7 +33,7 @@ customConfig =
     { defaultConfig | titleClass = "red", weekdayFormat = "dd" }
 
 
-customWeekdayFormatter : String -> Day -> String
+customWeekdayFormatter : String -> Weekday -> String
 customWeekdayFormatter _ day =
     case day of
         Mon ->
@@ -68,7 +69,7 @@ customTitleFormatter year month =
                 _ ->
                     "unknown"
     in
-        formattedMonth ++ " " ++ toString year
+    formattedMonth ++ " " ++ String.fromInt year
 
 
 customConfigWithFormatters : Config

@@ -1,26 +1,27 @@
 module Test.API exposing (..)
 
-import Expect
-import Test exposing (..)
-import Date exposing (..)
+import Date exposing (Date)
 import DatePicker
     exposing
         ( DatePicker
         , Selection(..)
-        , initCalendar
+        , cancelDates
+        , clearDates
         , getFrom
-        , getTo
-        , getSelectedDate
-        , isOpen
         , getMonth
         , getNextMonth
-        , setDate
-        , toggleCalendar
+        , getSelectedDate
+        , getTo
+        , initCalendar
+        , isOpen
         , nextMonth
         , previousMonth
-        , clearDates
-        , cancelDates
+        , setDate
+        , toggleCalendar
         )
+import Expect
+import Test exposing (..)
+import Time exposing (Month(..))
 
 
 rangeCalendar : DatePicker
@@ -41,25 +42,25 @@ suite =
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date rangeCalendar
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (dateCase getFrom c) (Date.toTime date)
-                            , \c -> Expect.equal (dateCase getTo c) 0
-                            , \c -> Expect.equal (dateCase getSelectedDate c) 0
-                            ]
-                            newCalendar
+                    Expect.all
+                        [ \c -> Expect.equal (dateCase getFrom c) date
+                        , \c -> Expect.equal (dateCase getTo c) invalid
+                        , \c -> Expect.equal (dateCase getSelectedDate c) invalid
+                        ]
+                        newCalendar
             , test "second setDate should change to" <|
                 \_ ->
                     let
                         date1 =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         date2 =
-                            Date.fromString "2018-09-10" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-10"
 
                         newCalendar1 =
                             setDate date1 rangeCalendar
@@ -67,26 +68,26 @@ suite =
                         newCalendar2 =
                             setDate date2 newCalendar1
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (dateCase getFrom c) (Date.toTime date1)
-                            , \c -> Expect.equal (dateCase getTo c) (Date.toTime date2)
-                            , \c -> Expect.equal (dateCase getSelectedDate c) 0
-                            ]
-                            newCalendar2
+                    Expect.all
+                        [ \c -> Expect.equal (dateCase getFrom c) date1
+                        , \c -> Expect.equal (dateCase getTo c) date2
+                        , \c -> Expect.equal (dateCase getSelectedDate c) invalid
+                        ]
+                        newCalendar2
             , test "toggleCalendar" <|
                 \_ ->
                     let
                         newCalendar =
                             toggleCalendar rangeCalendar
                     in
-                        Expect.equal (isOpen newCalendar) True
+                    Expect.equal (isOpen newCalendar) True
             , test "nextMonth - getMonth" <|
                 \_ ->
                     let
                         newCalendar =
                             nextMonth rangeCalendar
                     in
-                        Expect.equal (getMonth newCalendar) ( 2018, Feb, [] )
+                    Expect.equal (getMonth newCalendar) ( 2018, Feb, [] )
             , test "nextMonth - getNextMonth" <|
                 \_ ->
                     let
@@ -96,7 +97,7 @@ suite =
                         ( _, newMonth, _ ) =
                             getNextMonth newCalendar
                     in
-                        Expect.equal newMonth Mar
+                    Expect.equal newMonth Mar
             , test "previousMonth - getMonth" <|
                 \_ ->
                     let
@@ -106,7 +107,7 @@ suite =
                         ( newYear, newMonth, _ ) =
                             getMonth newCalendar
                     in
-                        Expect.equal ( newYear, newMonth ) ( 2017, Dec )
+                    Expect.equal ( newYear, newMonth ) ( 2017, Dec )
             , test "previousMonth - getNextMonth" <|
                 \_ ->
                     let
@@ -116,12 +117,12 @@ suite =
                         ( _, newMonth, _ ) =
                             getNextMonth newCalendar
                     in
-                        Expect.equal newMonth Jan
+                    Expect.equal newMonth Jan
             , test "clearDates" <|
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date rangeCalendar
@@ -129,17 +130,17 @@ suite =
                         newCalendar2 =
                             clearDates newCalendar
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (getFrom c) Nothing
-                            , \c -> Expect.equal (getTo c) Nothing
-                            , \c -> Expect.equal (getSelectedDate c) Nothing
-                            ]
-                            newCalendar2
+                    Expect.all
+                        [ \c -> Expect.equal (getFrom c) Nothing
+                        , \c -> Expect.equal (getTo c) Nothing
+                        , \c -> Expect.equal (getSelectedDate c) Nothing
+                        ]
+                        newCalendar2
             , test "cancelDates" <|
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date rangeCalendar
@@ -150,38 +151,38 @@ suite =
                         newCalendar3 =
                             cancelDates newCalendar2
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (getFrom c) Nothing
-                            , \c -> Expect.equal (getTo c) Nothing
-                            , \c -> Expect.equal (getSelectedDate c) Nothing
-                            , \c -> Expect.equal (isOpen c) False
-                            ]
-                            newCalendar3
+                    Expect.all
+                        [ \c -> Expect.equal (getFrom c) Nothing
+                        , \c -> Expect.equal (getTo c) Nothing
+                        , \c -> Expect.equal (getSelectedDate c) Nothing
+                        , \c -> Expect.equal (isOpen c) False
+                        ]
+                        newCalendar3
             ]
         , describe "applied to singleCalendar"
             [ test "setDate should change selectedDate" <|
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date singleCalendar
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (dateCase getSelectedDate c) (Date.toTime date)
-                            , \c -> Expect.equal (dateCase getFrom c) 0
-                            , \c -> Expect.equal (dateCase getTo c) 0
-                            ]
-                            newCalendar
+                    Expect.all
+                        [ \c -> Expect.equal (dateCase getSelectedDate c) date
+                        , \c -> Expect.equal (dateCase getFrom c) invalid
+                        , \c -> Expect.equal (dateCase getTo c) invalid
+                        ]
+                        newCalendar
             , test "second setDate should change selectedDate again" <|
                 \_ ->
                     let
                         date1 =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         date2 =
-                            Date.fromString "2018-09-10" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-10"
 
                         newCalendar1 =
                             setDate date1 singleCalendar
@@ -189,17 +190,17 @@ suite =
                         newCalendar2 =
                             setDate date2 newCalendar1
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (dateCase getSelectedDate c) (Date.toTime date2)
-                            , \c -> Expect.equal (dateCase getFrom c) 0
-                            , \c -> Expect.equal (dateCase getTo c) 0
-                            ]
-                            newCalendar2
+                    Expect.all
+                        [ \c -> Expect.equal (dateCase getSelectedDate c) date2
+                        , \c -> Expect.equal (dateCase getFrom c) invalid
+                        , \c -> Expect.equal (dateCase getTo c) invalid
+                        ]
+                        newCalendar2
             , test "clearDates" <|
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date singleCalendar
@@ -207,17 +208,17 @@ suite =
                         newCalendar2 =
                             clearDates newCalendar
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (getFrom c) Nothing
-                            , \c -> Expect.equal (getTo c) Nothing
-                            , \c -> Expect.equal (getSelectedDate c) Nothing
-                            ]
-                            newCalendar2
+                    Expect.all
+                        [ \c -> Expect.equal (getFrom c) Nothing
+                        , \c -> Expect.equal (getTo c) Nothing
+                        , \c -> Expect.equal (getSelectedDate c) Nothing
+                        ]
+                        newCalendar2
             , test "cancelDates" <|
                 \_ ->
                     let
                         date =
-                            Date.fromString "2018-09-09" |> Result.withDefault (Date.fromTime 0)
+                            parseDate "2018-09-09"
 
                         newCalendar =
                             setDate date singleCalendar
@@ -228,22 +229,29 @@ suite =
                         newCalendar3 =
                             cancelDates newCalendar2
                     in
-                        Expect.all
-                            [ \c -> Expect.equal (getFrom c) Nothing
-                            , \c -> Expect.equal (getTo c) Nothing
-                            , \c -> Expect.equal (getSelectedDate c) Nothing
-                            , \c -> Expect.equal (isOpen c) False
-                            ]
-                            newCalendar3
+                    Expect.all
+                        [ \c -> Expect.equal (getFrom c) Nothing
+                        , \c -> Expect.equal (getTo c) Nothing
+                        , \c -> Expect.equal (getSelectedDate c) Nothing
+                        , \c -> Expect.equal (isOpen c) False
+                        ]
+                        newCalendar3
             ]
         ]
 
 
-dateCase : (DatePicker -> Maybe Date) -> DatePicker -> Float
-dateCase func calendar =
-    case func calendar of
-        Just d ->
-            Date.toTime d
+parseDate : String -> Date.Date
+parseDate isoDate =
+    Date.fromIsoString isoDate
+        |> Result.withDefault invalid
 
-        Nothing ->
-            0
+
+invalid : Date
+invalid =
+    Date.fromCalendarDate 1970 Jan 1
+
+
+dateCase : (DatePicker -> Maybe Date) -> DatePicker -> Date
+dateCase func calendar =
+    func calendar
+        |> Maybe.withDefault invalid

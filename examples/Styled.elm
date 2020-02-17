@@ -1,11 +1,10 @@
-module Styled exposing (..)
+module Styled exposing (main)
 
+import Browser
+import Date exposing (Date)
+import DatePicker
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import DatePicker
-import Date exposing (Date)
-import Task
 
 
 type alias Model =
@@ -18,10 +17,10 @@ type Msg
     | NextMonth
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    program
-        { init = init
+    Browser.element
+        { init = always init
         , update = update
         , subscriptions = always Sub.none
         , view = view
@@ -47,19 +46,19 @@ view model =
 config : DatePicker.Config
 config =
     let
-        config =
+        config_ =
             DatePicker.defaultConfig
     in
-        { config
-            | rangeClass = "bg-dark-red white"
-            , titleClass = "helvetica bg-red white ma0 pa2"
-            , calendarClass = "ba b--light-gray pb3 dib helvetica"
-            , rangeHoverClass = "bg-dark-red moon-gray"
-            , selectedClass = "bg-red br1 white selected"
-            , dayClass = "pa2"
-            , weekdayFormat = "ddd"
-            , validDate = validDate
-        }
+    { config_
+        | rangeClass = "bg-dark-red white"
+        , titleClass = "helvetica bg-red white ma0 pa2"
+        , calendarClass = "ba b--light-gray pb3 dib helvetica"
+        , rangeHoverClass = "bg-dark-red moon-gray"
+        , selectedClass = "bg-red br1 white selected"
+        , dayClass = "pa2"
+        , weekdayFormat = "ddd"
+        , validDate = validDate
+    }
 
 
 validDate : Maybe Date -> Maybe Date -> Bool
@@ -69,7 +68,7 @@ validDate date currentDate =
             True
 
         ( Just date1, Just date2 ) ->
-            (Date.toTime date1) >= (Date.toTime date2)
+            Date.toRataDie date1 >= Date.toRataDie date2
 
         ( Nothing, Just _ ) ->
             False
@@ -79,10 +78,16 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DatePickerMsg datePickerMsg ->
-            { model | calendar = DatePicker.update datePickerMsg model.calendar } ! []
+            ( { model | calendar = DatePicker.update datePickerMsg model.calendar }
+            , Cmd.none
+            )
 
         PreviousMonth ->
-            { model | calendar = DatePicker.previousMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.previousMonth model.calendar }
+            , Cmd.none
+            )
 
         NextMonth ->
-            { model | calendar = DatePicker.nextMonth model.calendar } ! []
+            ( { model | calendar = DatePicker.nextMonth model.calendar }
+            , Cmd.none
+            )

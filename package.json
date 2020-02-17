@@ -11,8 +11,8 @@
     "node": "9.3.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "node_modules/.bin/elm make examples/*.elm --output=examples/example.js --yes",
+    "test": "elm-test --verbose && ./cypress-tests.sh",
+    "postinstall": "cd examples && ../node_modules/.bin/elm make *.elm --output=example.js && cd ..",
     "start": "node_modules/.bin/http-server ./examples"
   },
   "repository": {
@@ -26,10 +26,12 @@
   },
   "homepage": "https://github.com/dwyl/elm-datepicker#readme",
   "devDependencies": {
-    "cypress": "^2.1.0"
+    "cypress": "^2.1.0",
+    "elm-format": "0.8.2",
+    "elm-test": "0.19.1-revision2"
   },
   "dependencies": {
-    "elm": "^0.18.0",
-    "http-server": "^0.11.1"
+    "elm": "0.19.1-3",
+    "http-server": "^0.12.1"
   }
 }
