@@ -13,7 +13,7 @@ describe("Testing Example App", function() {
       cy.fixture("dates").then(dates => {
         cy
           .get("#title")
-          .should("contain", dates.month[new Date(Date.now()).getMonth()]);
+          .should("contain", dates.month[new Date().getMonth()]);
       });
     });
 
@@ -36,7 +36,7 @@ describe("Testing Example App", function() {
           .get("#title")
           .should(
             "contain",
-            getOverflowIndex(dates.month, new Date(Date.now()).getMonth() - 1)
+            getOverflowIndex(dates.month, new Date().getMonth() - 1)
           );
       });
     });
@@ -49,7 +49,7 @@ describe("Testing Example App", function() {
           .get("#title")
           .should(
             "contain",
-            getOverflowIndex(dates.month, new Date(Date.now()).getMonth() + 1)
+            getOverflowIndex(dates.month, new Date().getMonth() + 1)
           );
       });
     });
@@ -102,21 +102,15 @@ describe("Testing Example App", function() {
 
 /* gets position of current day on calendar */
 function todaysPosition() {
-  const currentMonth = new Date(Date.now());
+  const currentMonth = new Date();
   const today = currentMonth.getDate();
+  const day = currentMonth.getDay();
 
   currentMonth.setDate(1);
   const firstOfMonth = currentMonth.getDay();
-  let todaysIndex;
+  const todaysIndex = today + (firstOfMonth === 0 ? 7 : firstOfMonth) - 1;
 
-  if (firstOfMonth > 0) {
-    todaysIndex = today + (firstOfMonth - 1);
-  } else {
-    // Sunday gives result of 0, but is in position 7 on our calendar
-    todaysIndex = today + (7 - 1);
-  }
-
-  return [Math.ceil(todaysIndex / 7), todaysIndex % 7];
+  return [Math.ceil(todaysIndex / 7), day === 0 ? 7 : day];
 }
 
 function getToday() {
@@ -127,42 +121,45 @@ function getToday() {
 /* Determines position of next day based on current day
   and whether it's the last day of the week or month */
 function nextDayPosition(currentDay) {
+  if (todayIsLastDayOfMonth()) {
+    return [1, (currentDay[1] % 7) + 1]
+  }
+  const currentDayIsSunday = currentDay[1] === 7;
+
   return [
-    lastDay() ? 1 : currentDay[0],
-    currentDay[1] === 7 ? 1 : currentDay[1] + 1
+    todayIsLastDayOfMonth() ? 1 : (currentDayIsSunday ? currentDay[0] + 1 : currentDay[0]),
+    (currentDay[1] % 7) + 1
   ];
 }
 
 function getNextDay(currentDay) {
   const nextDay = nextDayPosition(currentDay);
 
-  if (lastDay()) {
-    return cy
+  if (todayIsLastDayOfMonth()) {
+    cy
       .get("#next-month")
-      .click()
-      .get(`tbody > :nth-child(${nextDay[0]}) > :nth-child(${nextDay[1]})`);
-  } else {
-    return cy.get(
-      `tbody > :nth-child(${nextDay[0]}) > :nth-child(${nextDay[1]})`
-    );
+      .click();
   }
+
+  return cy.get(
+    `tbody > :nth-child(${nextDay[0]}) > :nth-child(${nextDay[1]})`
+  );
 }
 
-function lastDay() {
-  const currentDate = new Date(Date.now());
+function todayIsLastDayOfMonth() {
+  const currentDate = new Date();
+  const today = currentDate.getDate();
 
   switch (currentDate.getMonth()) {
     case 1:
-      return currentDate.getDate() === 29 || currentDate.getDate() === 28;
-      break;
+      return today === 29 || today === 28;
     case 3:
     case 5:
     case 8:
     case 10:
-      return currentDate.getDate() === 30;
-      break;
+      return today === 30;
     default:
-      return currentDate.getDate() === 31;
+      return today === 31;
   }
 }
 
