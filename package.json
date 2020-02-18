@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/dwyl/elm-datepicker#readme",
   "devDependencies": {
-    "cypress": "^2.1.0",
+    "cypress": "^4.0.2",
     "elm-format": "0.8.2",
     "elm-test": "0.19.1-revision2"
   },
