@@ -153,7 +153,7 @@ compareMaybeDate date1 date2 =
             GT
 
         ( Just d1, Just d2 ) ->
-            compare (Date.toRataDie d1) (Date.toRataDie d2)
+            Date.compare d1 d2
 
 
 equal : Maybe Date -> Maybe Date -> Bool

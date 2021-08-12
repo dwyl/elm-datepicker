@@ -121,6 +121,8 @@ type Msg
 
   - **weekdayFormatter**: Custom implementation of `weekdayFormat`, needed to support non-english languages.
 
+  - **dateFormatter**: Date formatter for aria-labels with language support through Date.formatWithLanguage.
+
   - **titleFormatter**: Format title based on year and month.
 
   - **validDate**: A function that takes a single date, and the current date, and returns true if that date is available to select,
@@ -138,6 +140,7 @@ type alias Config =
     , titleClass : String
     , weekdayFormat : String
     , weekdayFormatter : String -> Weekday -> String
+    , dateFormatter : String -> Date -> String
     , titleFormatter : Year -> Month -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
@@ -192,6 +195,7 @@ initCalendar selection =
         , titleClass = "tc"
         , weekdayFormat = "ddd"
         , weekdayFormatter = defaultWeekdayFormatter
+        , dateFormatter = Date.format
         , titleFormatter = defaultTitleFormatter
         , validDate = validDate
         }
@@ -217,6 +221,7 @@ defaultConfig =
     , titleClass = "tc"
     , weekdayFormat = "ddd"
     , weekdayFormatter = defaultWeekdayFormatter
+    , dateFormatter = Date.format
     , titleFormatter = defaultTitleFormatter
     , validDate = validDate
     }
@@ -305,7 +310,7 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
                 , onClick (SelectDate date)
                 , onMouseOver (OverDate date)
                 , tabindex 0
-                , attribute "role" "option"
+                , attribute "role" "gridcell"
                 , attribute "aria-selected" <| boolToString selected
                 , onEnter (SelectDate date)
                 ]
@@ -313,12 +318,32 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
             else
                 case date of
                     Just _ ->
-                        [ class (config.dayClass ++ " " ++ config.disabledClass) ]
+                        [ class (config.dayClass ++ " " ++ config.disabledClass)
+                        , attribute "aria-hidden" "true"
+                        , attribute "disabled" "true"
+                        ]
 
                     Nothing ->
-                        [ class config.dayClass ]
+                        [ class config.dayClass
+                        , attribute "aria-hidden" "true"
+                        , attribute "disabled" "true"
+                        ]
     in
-    td attributes [ text <| DateCore.getFormattedDate date ]
+    td attributes
+        [ span
+            [ attribute "role" "button"
+            , attribute "aria-label"
+                (date
+                    |> Maybe.map (config.dateFormatter "EEEE, d MMMM y")
+                    |> Maybe.withDefault ""
+                )
+            ]
+            [ span
+                [ attribute "aria-hidden" "true"
+                ]
+                [ text <| DateCore.getFormattedDate date ]
+            ]
+        ]
 
 
 getDates : Year -> Month -> List (Maybe Date)
@@ -385,16 +410,15 @@ showCalendar (DatePicker model) monthData config =
     in
     div [ class config.calendarClass ]
         [ h1 [ class config.titleClass, id "title" ] [ text title ]
-        , table []
+        , table
+            [ attribute "role" "grid"
+            , attribute "aria-multiselectable" multiselectable
+            ]
             [ thead []
                 [ tr []
                     (renderWeekdays config)
                 ]
-            , tbody
-                [ attribute "role" "listbox"
-                , attribute "aria-multiselectable" multiselectable
-                ]
-                (showMonth (DatePicker model) config dates)
+            , tbody [] (showMonth (DatePicker model) config dates)
             ]
         ]
 
@@ -405,10 +429,24 @@ renderWeekdays config =
         days =
             [ Mon, Tue, Wed, Thu, Fri, Sat, Sun ]
 
+        weekday d =
+            Date.fromWeekDate 2018 2 d
+                |> config.dateFormatter "EEEE"
+
         format =
             config.weekdayFormatter config.weekdayFormat
+
+        renderCell day =
+            td
+                [ class config.dayClass
+                , attribute "role" "columnheader"
+                , attribute "scope" "col"
+                , attribute "title" (weekday day)
+                , attribute "aria-label" (weekday day)
+                ]
+                [ format day |> text ]
     in
-    List.map (\day -> td [ class config.dayClass ] [ format day |> text ]) days
+    days |> List.map renderCell
 
 
 {-| The DatePicker update function
@@ -514,7 +552,7 @@ update msg (DatePicker model) =
                         _ ->
                             From
             in
-            DatePicker { model | from = Nothing, to = Nothing, single = Nothing, selectDate = selection, overDate = Nothing }
+            DatePicker { model | from = Nothing, to = Nothing, single = Nothing, selectDate = selection }
 
 
 {-| Get the `from` date in a selected range

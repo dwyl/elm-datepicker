@@ -38,10 +38,10 @@ view : Model -> Html Msg
 view model =
     div []
         [ h2 [ class "helvetica m0" ] [ text "Simple DatePicker" ]
-        , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth ] [ text "<" ]
+        , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth, attribute "aria-label" "previous month"] [ text "<" ]
         , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) DatePicker.defaultConfig
             |> Html.map DatePickerMsg
-        , button [ id "next-month", class "bn pointer gray", onClick NextMonth ] [ text ">" ]
+        , button [ id "next-month", class "bn pointer gray", onClick NextMonth, attribute "aria-label" "next month" ] [ text ">" ]
         ]
 
 
