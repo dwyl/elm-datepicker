@@ -38,7 +38,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ h2 [ class "helvetica ma4" ] [ text "Styled DatePicker" ]
-        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+        , DatePicker.showCalendar model.calendar config
             |> Html.map DatePickerMsg
         ]
 

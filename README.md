@@ -45,7 +45,7 @@ Don't forget, the Html will return a `DatePicker.Msg`, so you have to map it to 
 view : Model -> Html Msg
 view model =
   div []
-    [ DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+    [ DatePicker.showCalendar model.calendar config
         |> Html.map DatePickerMsg
     ]
 

@@ -37,12 +37,20 @@ init =
 
 view : Model -> Html Msg
 view model =
+    let
+        ( year, month ) =
+            DatePicker.getMonth model.calendar
+
+        nextMonth =
+            Date.fromCalendarDate year month 1
+                |> Date.add Date.Months 1
+    in
     div []
         [ h2 [ class "helvetica" ] [ text "Two Month DatePicker" ]
         , button [ id "previous-month", class "bn gray pointer", onClick PreviousMonth ] [ text "<" ]
-        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+        , DatePicker.showCalendar model.calendar config
             |> Html.map DatePickerMsg
-        , DatePicker.showCalendar model.calendar (DatePicker.getNextMonth model.calendar) config
+        , DatePicker.showCalendarForMonth ( Date.year nextMonth, Date.month nextMonth ) model.calendar config
             |> Html.map DatePickerMsg
         , button [ id "next-month", class "bn gray pointer", onClick NextMonth ] [ text ">" ]
         ]
