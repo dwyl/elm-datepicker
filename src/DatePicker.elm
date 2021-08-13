@@ -1,7 +1,7 @@
 module DatePicker exposing
     ( DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection(..), receiveDate
     , getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
-    , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
+    , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate, setDisplayMonth
     )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
@@ -31,7 +31,7 @@ Or
   newDatePicker = DatePicker.clearDates datepicker
 ```
 
-@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
+@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate, setDisplayMonth
 
 -}
 
@@ -165,7 +165,7 @@ initCalendar selection =
                 Single ->
                     Only
     in
-    DatePicker <|
+    DatePicker
         { currentDate = Nothing
         , month = ( 2018, Jan, [] )
         , nextMonth = ( 2018, Feb, [] )
@@ -417,20 +417,8 @@ update : Msg -> DatePicker -> DatePicker
 update msg (DatePicker model) =
     case msg of
         ReceiveDate date ->
-            let
-                ( year1, month1 ) =
-                    ( Date.year date, Date.month date )
-
-                currentMonth =
-                    getDates year1 month1
-
-                ( year2, month2 ) =
-                    DateCore.getYearAndMonthNext year1 month1
-
-                nextMonth_ =
-                    getDates year2 month2
-            in
-            DatePicker { model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth_ ), currentDate = Just date }
+            DatePicker { model | currentDate = Just date }
+                |> setDisplayMonth (Date.year date) (Date.month date)
 
         ToggleCalendar ->
             DatePicker { model | open = not model.open }
@@ -442,24 +430,17 @@ update msg (DatePicker model) =
 
                 ( prevYear, prevMonth ) =
                     DateCore.getYearAndMonthPrevious year month
-
-                prevData =
-                    getDates prevYear prevMonth
             in
-            DatePicker { model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month }
+            DatePicker model
+                |> setDisplayMonth prevYear prevMonth
 
         NextMonth ->
             let
                 ( year, month, _ ) =
                     model.nextMonth
-
-                ( nextYear, nextMonth_ ) =
-                    DateCore.getYearAndMonthNext year month
-
-                nextData =
-                    getDates nextYear nextMonth_
             in
-            DatePicker { model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth_, nextData ) }
+            DatePicker model
+                |> setDisplayMonth year month
 
         SelectDate date ->
             case date of
@@ -606,6 +587,28 @@ receiveDate =
 setDate : Date -> DatePicker -> DatePicker
 setDate date =
     update (SelectDate (Just date))
+        >> setDisplayMonth (Date.year date) (Date.month date)
+
+
+{-| Manually display the given month
+-}
+setDisplayMonth : Int -> Month -> DatePicker -> DatePicker
+setDisplayMonth year month (DatePicker model) =
+    let
+        currentMonth =
+            getDates year month
+
+        ( yearNext, monthNext ) =
+            DateCore.getYearAndMonthNext year month
+
+        nextMonth_ =
+            getDates yearNext monthNext
+    in
+    DatePicker
+        { model
+            | month = ( year, month, currentMonth )
+            , nextMonth = ( yearNext, monthNext, nextMonth_ )
+        }
 
 
 {-| When the enter key is released, send the `msg`. Otherwise, do nothing.

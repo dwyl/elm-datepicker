@@ -17,6 +17,7 @@ import DatePicker
         , nextMonth
         , previousMonth
         , setDate
+        , setDisplayMonth
         , toggleCalendar
         )
 import Expect
@@ -86,8 +87,11 @@ suite =
                     let
                         newCalendar =
                             nextMonth rangeCalendar
+
+                        ( newYear, newMonth, _ ) =
+                            getMonth newCalendar
                     in
-                    Expect.equal (getMonth newCalendar) ( 2018, Feb, [] )
+                    Expect.equal ( newYear, newMonth ) ( 2018, Feb )
             , test "nextMonth - getNextMonth" <|
                 \_ ->
                     let
@@ -196,6 +200,19 @@ suite =
                         , \c -> Expect.equal (dateCase getTo c) invalid
                         ]
                         newCalendar2
+            , test "setDisplayMonth should update calendar's year and month" <|
+                \_ ->
+                    let
+                        date =
+                            parseDate "2021-08-13"
+
+                        newCalendar =
+                            setDisplayMonth (Date.year date) (Date.month date) singleCalendar
+
+                        ( year, month, _ ) =
+                            getMonth newCalendar
+                    in
+                    Expect.equal ( year, month ) ( 2021, Aug )
             , test "clearDates" <|
                 \_ ->
                     let
