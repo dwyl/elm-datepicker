@@ -133,7 +133,7 @@ type alias Config =
     , titleClass : String
     , weekdayFormat : String
     , weekdayFormatter : String -> Weekday -> String
-    , titleFormatter : Year -> Month -> String
+    , titleFormatter : ( Year, Month ) -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
@@ -216,8 +216,8 @@ defaultConfig =
     }
 
 
-defaultTitleFormatter : Year -> Month -> String
-defaultTitleFormatter year month =
+defaultTitleFormatter : ( Year, Month ) -> String
+defaultTitleFormatter ( year, month ) =
     DateCore.monthToString month ++ " " ++ String.fromInt year
 
 
@@ -315,11 +315,11 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
     td attributes [ text <| DateCore.getFormattedDate date ]
 
 
-getDates : Year -> Month -> List (Maybe Date)
-getDates year month =
+getDates : ( Year, Month ) -> List (Maybe Date)
+getDates month =
     let
         datesOfMonth =
-            DateCore.datesOfMonth year month
+            DateCore.datesOfMonth month
     in
     List.concat
         [ List.head datesOfMonth
@@ -374,11 +374,7 @@ showCalendar (DatePicker model) =
 -}
 showCalendarForMonth : ( Year, Month ) -> DatePicker -> Config -> Html Msg
 showCalendarForMonth ( year, month ) =
-    let
-        currentMonth =
-            getDates year month
-    in
-    showCalendar_ ( year, month, currentMonth )
+    showCalendar_ ( year, month, getDates ( year, month ) )
 
 
 showCalendar_ : ( Year, Month, List (Maybe Date) ) -> DatePicker -> Config -> Html Msg
@@ -388,7 +384,7 @@ showCalendar_ monthData (DatePicker model) config =
             monthData
 
         title =
-            config.titleFormatter year month
+            config.titleFormatter ( year, month )
 
         multiselectable =
             model.selectDate /= Only |> boolToString
@@ -435,25 +431,21 @@ update msg (DatePicker model) =
 
         PreviousMonth ->
             let
-                ( year, month ) =
+                prevMonth =
                     getMonth (DatePicker model)
-
-                ( yearPrev, monthPrev ) =
-                    DateCore.getYearAndMonthPrevious year month
+                        |> DateCore.getYearAndMonthPrevious
             in
             DatePicker model
-                |> setMonth ( yearPrev, monthPrev )
+                |> setMonth prevMonth
 
         NextMonth ->
             let
-                ( year, month ) =
+                nextMonth_ =
                     getMonth (DatePicker model)
-
-                ( yearNext, monthNext ) =
-                    DateCore.getYearAndMonthNext year month
+                        |> DateCore.getYearAndMonthNext
             in
             DatePicker model
-                |> setMonth ( yearNext, monthNext )
+                |> setMonth nextMonth_
 
         SelectDate date ->
             case date of
@@ -604,7 +596,7 @@ setDate date =
 -}
 setMonth : ( Year, Month ) -> DatePicker -> DatePicker
 setMonth ( year, month ) (DatePicker model) =
-    DatePicker { model | month = ( year, month, getDates year month ) }
+    DatePicker { model | month = ( year, month, getDates ( year, month ) ) }
 
 
 {-| When the enter key is released, send the `msg`. Otherwise, do nothing.

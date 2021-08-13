@@ -58,8 +58,8 @@ customWeekdayFormatter _ day =
             "Søndag"
 
 
-customTitleFormatter : Int -> Month -> String
-customTitleFormatter year month =
+customTitleFormatter : ( Int, Month ) -> String
+customTitleFormatter ( year, month ) =
     let
         formattedMonth =
             case month of
