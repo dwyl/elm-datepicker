@@ -1,19 +1,19 @@
 module DatePicker exposing
-    ( DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection(..), receiveDate
-    , getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
-    , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
+    ( DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, showCalendarForMonth, update, Selection(..), receiveDate
+    , getFrom, getTo, getMonth, isOpen, getSelectedDate
+    , clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate, setMonth
     )
 
 {-| A customisable DatePicker that easily allows you to select a range of dates
 
-@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, update, Selection, receiveDate
+@docs DatePicker, Msg, Config, defaultConfig, initCalendar, showCalendar, showCalendarForMonth, update, Selection, receiveDate
 
 
 # Getter Functions
 
 These functions allow you to access data from the DatePicker model.
 
-@docs getFrom, getTo, getMonth, getNextMonth, isOpen, getSelectedDate
+@docs getFrom, getTo, getMonth, isOpen, getSelectedDate
 
 
 # API Functions
@@ -31,7 +31,7 @@ Or
   newDatePicker = DatePicker.clearDates datepicker
 ```
 
-@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate
+@docs clearDates, toggleCalendar, cancelDates, previousMonth, nextMonth, setDate, setMonth
 
 -}
 
@@ -43,10 +43,6 @@ import Html.Events exposing (onClick, onMouseOver)
 import Json.Decode
 import Task
 import Time exposing (Month(..), Weekday(..))
-
-
-type alias MonthData =
-    ( Year, Month, List (Maybe Date) )
 
 
 type FromTo
@@ -65,8 +61,7 @@ type Selection
 
 type alias Model =
     { currentDate : Maybe Date
-    , month : MonthData
-    , nextMonth : MonthData
+    , month : ( Year, Month, List (Maybe Date) )
     , open : Bool
     , selectDate : FromTo
     , from : Maybe Date
@@ -138,7 +133,7 @@ type alias Config =
     , titleClass : String
     , weekdayFormat : String
     , weekdayFormatter : String -> Weekday -> String
-    , titleFormatter : Year -> Month -> String
+    , titleFormatter : ( Year, Month ) -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
@@ -165,10 +160,9 @@ initCalendar selection =
                 Single ->
                     Only
     in
-    DatePicker <|
+    DatePicker
         { currentDate = Nothing
         , month = ( 2018, Jan, [] )
-        , nextMonth = ( 2018, Feb, [] )
         , open = False
         , selectDate = selectDate
         , from = Nothing
@@ -222,8 +216,8 @@ defaultConfig =
     }
 
 
-defaultTitleFormatter : Year -> Month -> String
-defaultTitleFormatter year month =
+defaultTitleFormatter : ( Year, Month ) -> String
+defaultTitleFormatter ( year, month ) =
     DateCore.monthToString month ++ " " ++ String.fromInt year
 
 
@@ -321,11 +315,11 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
     td attributes [ text <| DateCore.getFormattedDate date ]
 
 
-getDates : Year -> Month -> List (Maybe Date)
-getDates year month =
+getDates : ( Year, Month ) -> List (Maybe Date)
+getDates month =
     let
         datesOfMonth =
-            DateCore.datesOfMonth year month
+            DateCore.datesOfMonth month
     in
     List.concat
         [ List.head datesOfMonth
@@ -350,11 +344,11 @@ showWeek (DatePicker model) config week =
 {-| The function called to show the calendar. Pass it a config record to customise the DatePicker:
 
     view : Model -> Html Msg
-    view =
-        model
-            div
-            []
-            [ DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config |> Html.map DatePickerMsg ]
+    view model =
+        div []
+            [ DatePicker.showCalendar model.calendar config
+                |> Html.map DatePickerMsg
+            ]
 
     config : DatePicker.Config
     config =
@@ -371,14 +365,26 @@ showWeek (DatePicker model) config week =
         = DatePickerMsg DatePicker.Msg
 
 -}
-showCalendar : DatePicker -> MonthData -> Config -> Html Msg
-showCalendar (DatePicker model) monthData config =
+showCalendar : DatePicker -> Config -> Html Msg
+showCalendar (DatePicker model) =
+    showCalendar_ model.month (DatePicker model)
+
+
+{-| Show any month from the calendar
+-}
+showCalendarForMonth : ( Year, Month ) -> DatePicker -> Config -> Html Msg
+showCalendarForMonth ( year, month ) =
+    showCalendar_ ( year, month, getDates ( year, month ) )
+
+
+showCalendar_ : ( Year, Month, List (Maybe Date) ) -> DatePicker -> Config -> Html Msg
+showCalendar_ monthData (DatePicker model) config =
     let
         ( year, month, dates ) =
             monthData
 
         title =
-            config.titleFormatter year month
+            config.titleFormatter ( year, month )
 
         multiselectable =
             model.selectDate /= Only |> boolToString
@@ -417,49 +423,29 @@ update : Msg -> DatePicker -> DatePicker
 update msg (DatePicker model) =
     case msg of
         ReceiveDate date ->
-            let
-                ( year1, month1 ) =
-                    ( Date.year date, Date.month date )
-
-                currentMonth =
-                    getDates year1 month1
-
-                ( year2, month2 ) =
-                    DateCore.getYearAndMonthNext year1 month1
-
-                nextMonth_ =
-                    getDates year2 month2
-            in
-            DatePicker { model | month = ( year1, month1, currentMonth ), nextMonth = ( year2, month2, nextMonth_ ), currentDate = Just date }
+            DatePicker { model | currentDate = Just date }
+                |> setMonth ( Date.year date, Date.month date )
 
         ToggleCalendar ->
             DatePicker { model | open = not model.open }
 
         PreviousMonth ->
             let
-                ( year, month, _ ) =
-                    model.month
-
-                ( prevYear, prevMonth ) =
-                    DateCore.getYearAndMonthPrevious year month
-
-                prevData =
-                    getDates prevYear prevMonth
+                prevMonth =
+                    getMonth (DatePicker model)
+                        |> DateCore.getYearAndMonthPrevious
             in
-            DatePicker { model | month = ( prevYear, prevMonth, prevData ), nextMonth = model.month }
+            DatePicker model
+                |> setMonth prevMonth
 
         NextMonth ->
             let
-                ( year, month, _ ) =
-                    model.nextMonth
-
-                ( nextYear, nextMonth_ ) =
-                    DateCore.getYearAndMonthNext year month
-
-                nextData =
-                    getDates nextYear nextMonth_
+                nextMonth_ =
+                    getMonth (DatePicker model)
+                        |> DateCore.getYearAndMonthNext
             in
-            DatePicker { model | month = model.nextMonth, nextMonth = ( nextYear, nextMonth_, nextData ) }
+            DatePicker model
+                |> setMonth nextMonth_
 
         SelectDate date ->
             case date of
@@ -540,16 +526,13 @@ getSelectedDate (DatePicker model) =
 
 {-| Get the current month
 -}
-getMonth : DatePicker -> MonthData
+getMonth : DatePicker -> ( Year, Month )
 getMonth (DatePicker model) =
-    model.month
-
-
-{-| Get the next month
--}
-getNextMonth : DatePicker -> MonthData
-getNextMonth (DatePicker model) =
-    model.nextMonth
+    let
+        ( year, month, _ ) =
+            model.month
+    in
+    ( year, month )
 
 
 {-| Returns whether the calendar is open or not
@@ -606,6 +589,14 @@ receiveDate =
 setDate : Date -> DatePicker -> DatePicker
 setDate date =
     update (SelectDate (Just date))
+        >> setMonth ( Date.year date, Date.month date )
+
+
+{-| Manually set the selected month
+-}
+setMonth : ( Year, Month ) -> DatePicker -> DatePicker
+setMonth ( year, month ) (DatePicker model) =
+    DatePicker { model | month = ( year, month, getDates ( year, month ) ) }
 
 
 {-| When the enter key is released, send the `msg`. Otherwise, do nothing.

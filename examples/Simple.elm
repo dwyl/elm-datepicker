@@ -39,7 +39,7 @@ view model =
     div []
         [ h2 [ class "helvetica m0" ] [ text "Simple DatePicker" ]
         , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth ] [ text "<" ]
-        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) DatePicker.defaultConfig
+        , DatePicker.showCalendar model.calendar DatePicker.defaultConfig
             |> Html.map DatePickerMsg
         , button [ id "next-month", class "bn pointer gray", onClick NextMonth ] [ text ">" ]
         ]

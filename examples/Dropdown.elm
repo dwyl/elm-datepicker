@@ -54,7 +54,8 @@ view model =
         , div
             [ classList [ ( "dn", not (DatePicker.isOpen model.calendar) ), ( "dib", DatePicker.isOpen model.calendar ) ], class "absolute top-3 left-0 bg-white w-100 ba b--moon-gray pt2 pb3 z-3" ]
             [ span [ class "pointer pa2 gray bn pointer", onClick PreviousMonth ] [ text "<" ]
-            , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config |> Html.map DatePickerMsg
+            , DatePicker.showCalendar model.calendar config
+                |> Html.map DatePickerMsg
             , span [ class "pointer pa2 gray bn pointer", onClick NextMonth ] [ text ">" ]
             ]
         ]

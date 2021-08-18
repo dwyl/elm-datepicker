@@ -6,7 +6,6 @@ import DatePicker
         , Selection(..)
         , getFrom
         , getMonth
-        , getNextMonth
         , getTo
         , initCalendar
         , isOpen
@@ -31,7 +30,5 @@ suite =
         , test "Default isOpen" <|
             \_ -> Expect.equal (isOpen rangeCalendar) False
         , test "Default Month" <|
-            \_ -> Expect.equal (getMonth rangeCalendar) ( 2018, Jan, [] )
-        , test "Default nextMonth" <|
-            \_ -> Expect.equal (getNextMonth rangeCalendar) ( 2018, Feb, [] )
+            \_ -> Expect.equal (getMonth rangeCalendar) ( 2018, Jan )
         ]

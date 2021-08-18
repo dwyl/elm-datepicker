@@ -9,7 +9,6 @@ import DatePicker
         , clearDates
         , getFrom
         , getMonth
-        , getNextMonth
         , getSelectedDate
         , getTo
         , initCalendar
@@ -17,6 +16,7 @@ import DatePicker
         , nextMonth
         , previousMonth
         , setDate
+        , setMonth
         , toggleCalendar
         )
 import Expect
@@ -83,41 +83,10 @@ suite =
                     Expect.equal (isOpen newCalendar) True
             , test "nextMonth - getMonth" <|
                 \_ ->
-                    let
-                        newCalendar =
-                            nextMonth rangeCalendar
-                    in
-                    Expect.equal (getMonth newCalendar) ( 2018, Feb, [] )
-            , test "nextMonth - getNextMonth" <|
-                \_ ->
-                    let
-                        newCalendar =
-                            nextMonth rangeCalendar
-
-                        ( _, newMonth, _ ) =
-                            getNextMonth newCalendar
-                    in
-                    Expect.equal newMonth Mar
+                    Expect.equal (rangeCalendar |> nextMonth |> getMonth) ( 2018, Feb )
             , test "previousMonth - getMonth" <|
                 \_ ->
-                    let
-                        newCalendar =
-                            previousMonth rangeCalendar
-
-                        ( newYear, newMonth, _ ) =
-                            getMonth newCalendar
-                    in
-                    Expect.equal ( newYear, newMonth ) ( 2017, Dec )
-            , test "previousMonth - getNextMonth" <|
-                \_ ->
-                    let
-                        newCalendar =
-                            previousMonth rangeCalendar
-
-                        ( _, newMonth, _ ) =
-                            getNextMonth newCalendar
-                    in
-                    Expect.equal newMonth Jan
+                    Expect.equal (rangeCalendar |> previousMonth |> getMonth) ( 2017, Dec )
             , test "clearDates" <|
                 \_ ->
                     let
@@ -196,6 +165,18 @@ suite =
                         , \c -> Expect.equal (dateCase getTo c) invalid
                         ]
                         newCalendar2
+            , test "setDisplayMonth should update calendar's year and month" <|
+                \_ ->
+                    let
+                        date =
+                            parseDate "2021-08-13"
+
+                        ( year, month ) =
+                            singleCalendar
+                                |> setMonth ( Date.year date, Date.month date )
+                                |> getMonth
+                    in
+                    Expect.equal ( year, month ) ( 2021, Aug )
             , test "clearDates" <|
                 \_ ->
                     let

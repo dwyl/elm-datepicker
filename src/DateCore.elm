@@ -27,8 +27,8 @@ isLeapYear year =
     ((modBy 4 year == 0) && (modBy 100 year /= 0)) || (modBy 400 year == 0)
 
 
-daysInMonth : Year -> Month -> Int
-daysInMonth year month =
+daysInMonth : ( Year, Month ) -> Int
+daysInMonth ( year, month ) =
     case month of
         Jan ->
             31
@@ -71,9 +71,9 @@ daysInMonth year month =
             31
 
 
-datesOfMonth : Year -> Month -> List Date
-datesOfMonth year month =
-    List.range 1 (daysInMonth year month)
+datesOfMonth : ( Year, Month ) -> List Date
+datesOfMonth ( year, month ) =
+    List.range 1 (daysInMonth ( year, month ))
         |> List.map (Date.fromCalendarDate year month)
 
 
@@ -103,14 +103,14 @@ getFormattedDate =
         >> Maybe.withDefault ""
 
 
-getYearAndMonthNext : Year -> Month -> ( Year, Month )
-getYearAndMonthNext year month =
-    addMonths 1 ( year, month )
+getYearAndMonthNext : ( Year, Month ) -> ( Year, Month )
+getYearAndMonthNext month =
+    addMonths 1 month
 
 
-getYearAndMonthPrevious : Year -> Month -> ( Year, Month )
-getYearAndMonthPrevious year month =
-    addMonths -1 ( year, month )
+getYearAndMonthPrevious : ( Year, Month ) -> ( Year, Month )
+getYearAndMonthPrevious month =
+    addMonths -1 month
 
 
 addMonths : Int -> ( Year, Month ) -> ( Year, Month )

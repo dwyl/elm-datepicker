@@ -40,7 +40,7 @@ view model =
     div []
         [ h2 [ class "helvetica m0" ] [ text "Range DatePicker" ]
         , button [ id "previous-month", class "bn pointer gray", onClick PreviousMonth ] [ text "<" ]
-        , DatePicker.showCalendar model.calendar (DatePicker.getMonth model.calendar) config
+        , DatePicker.showCalendar model.calendar config
             |> Html.map DatePickerMsg
         , button [ id "next-month", class "bn pointer gray", onClick NextMonth ] [ text ">" ]
         ]

@@ -25,7 +25,7 @@ rangeCalendar =
 
 calendarHtml : Html Msg
 calendarHtml =
-    showCalendar rangeCalendar ( 2018, Jan, [] ) defaultConfig
+    showCalendar rangeCalendar defaultConfig
 
 
 customConfig : Config
@@ -58,8 +58,8 @@ customWeekdayFormatter _ day =
             "Søndag"
 
 
-customTitleFormatter : Int -> Month -> String
-customTitleFormatter year month =
+customTitleFormatter : ( Int, Month ) -> String
+customTitleFormatter ( year, month ) =
     let
         formattedMonth =
             case month of
@@ -82,12 +82,12 @@ customConfigWithFormatters =
 
 customCalendar : Html Msg
 customCalendar =
-    showCalendar rangeCalendar ( 2018, Jan, [] ) customConfig
+    showCalendar rangeCalendar customConfig
 
 
 customCalenderWithFormatters : Html Msg
 customCalenderWithFormatters =
-    showCalendar rangeCalendar ( 2018, Jan, [] ) customConfigWithFormatters
+    showCalendar rangeCalendar customConfigWithFormatters
 
 
 suite : Test
