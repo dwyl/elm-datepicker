@@ -1,6 +1,5 @@
 module DateCore exposing
-    ( Year
-    , datesOfMonth
+    ( datesOfMonth
     , equal
     , getFormattedDate
     , getYearAndMonthNext
