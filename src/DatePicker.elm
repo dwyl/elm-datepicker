@@ -36,7 +36,7 @@ Or
 -}
 
 import Date exposing (Date)
-import DateCore exposing (Year)
+import DateCore
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onMouseOver)
@@ -61,7 +61,7 @@ type Selection
 
 type alias Model =
     { currentDate : Maybe Date
-    , month : ( Year, Month, List (Maybe Date) )
+    , month : ( Int, Month, List (Maybe Date) )
     , open : Bool
     , selectDate : FromTo
     , from : Maybe Date
@@ -133,7 +133,7 @@ type alias Config =
     , titleClass : String
     , weekdayFormat : String
     , weekdayFormatter : String -> Weekday -> String
-    , titleFormatter : ( Year, Month ) -> String
+    , titleFormatter : ( Int, Month ) -> String
     , validDate : Maybe Date -> Maybe Date -> Bool
     }
 
@@ -216,7 +216,7 @@ defaultConfig =
     }
 
 
-defaultTitleFormatter : ( Year, Month ) -> String
+defaultTitleFormatter : ( Int, Month ) -> String
 defaultTitleFormatter ( year, month ) =
     DateCore.monthToString month ++ " " ++ String.fromInt year
 
@@ -315,7 +315,7 @@ showDate (DatePicker { currentDate, from, to, single, overDate }) config date =
     td attributes [ text <| DateCore.getFormattedDate date ]
 
 
-getDates : ( Year, Month ) -> List (Maybe Date)
+getDates : ( Int, Month ) -> List (Maybe Date)
 getDates month =
     let
         datesOfMonth =
@@ -372,12 +372,12 @@ showCalendar (DatePicker model) =
 
 {-| Show any month from the calendar
 -}
-showCalendarForMonth : ( Year, Month ) -> DatePicker -> Config -> Html Msg
+showCalendarForMonth : ( Int, Month ) -> DatePicker -> Config -> Html Msg
 showCalendarForMonth ( year, month ) =
     showCalendar_ ( year, month, getDates ( year, month ) )
 
 
-showCalendar_ : ( Year, Month, List (Maybe Date) ) -> DatePicker -> Config -> Html Msg
+showCalendar_ : ( Int, Month, List (Maybe Date) ) -> DatePicker -> Config -> Html Msg
 showCalendar_ monthData (DatePicker model) config =
     let
         ( year, month, dates ) =
@@ -526,7 +526,7 @@ getSelectedDate (DatePicker model) =
 
 {-| Get the current month
 -}
-getMonth : DatePicker -> ( Year, Month )
+getMonth : DatePicker -> ( Int, Month )
 getMonth (DatePicker model) =
     let
         ( year, month, _ ) =
@@ -594,7 +594,7 @@ setDate date =
 
 {-| Manually set the selected month
 -}
-setMonth : ( Year, Month ) -> DatePicker -> DatePicker
+setMonth : ( Int, Month ) -> DatePicker -> DatePicker
 setMonth ( year, month ) (DatePicker model) =
     DatePicker { model | month = ( year, month, getDates ( year, month ) ) }
 
