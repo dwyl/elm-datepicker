@@ -3,6 +3,7 @@
 A customisable Datepicker written in Elm.
 
 [![Build Status](https://travis-ci.org/dwyl/elm-datepicker.svg?branch=master)](https://travis-ci.org/dwyl/elm-datepicker)
+[![HitCount](https://hits.dwyl.com/dwyl/elm-datepicker.svg)](https://hits.dwyl.com/dwyl/elm-datepicker)
 
 ## Demo/Example: https://elm-datepicker.herokuapp.com/#Styled
 
@@ -152,4 +153,4 @@ If you want to see the tests running in the [cypress test runner](https://docs.c
 ./node_modules/.bin/cypress open
 ```
 
-[![HitCount](http://hits.dwyl.io/dwyl/elm-datepicker.svg)](http://hits.dwyl.io/dwyl/elm-datepicker)
+
